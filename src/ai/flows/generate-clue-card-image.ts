@@ -31,7 +31,11 @@ const generateClueCardImageFlow = ai.defineFlow(
     outputSchema: GenerateClueCardImageOutputSchema,
   },
   async ({clues, colorPreference}) => {
-    const prompt = `Generate a visually unique, abstract, and artistic illustration for a social deduction game's clue card. The style should be mysterious and ghostly, using a primary color theme of ${colorPreference}. The illustration should be a symbolic and abstract representation of the following concepts, weaving them together into a cohesive artwork: ${clues.join(", ")}. The final image should have an aspect ratio of 9:16 and look like a digital art piece, not a photo.`;
+    const prompt = `Create a whimsical and cartoonish illustration for a social deduction game's clue card. The main character of the illustration is a simple, lovable, and gender-neutral mascot, similar to a "ZooZoo" or a stick figure. This mascot should be depicted in a single, cohesive scene that creatively combines all of the following concepts: ${clues.join(", ")}.
+
+The scene should be imaginative and visually tell a story based on the clues. For example, if the clues are "Joker," "white wine," and "Iceland," the mascot could be sipping wine with a Joker-like grin under the Northern Lights.
+
+Use a vibrant color palette influenced by the color theme: ${colorPreference}. The artwork should be fun, friendly, and have a 9:16 aspect ratio. Do not include any text in the image.`;
 
     const response = await ai.generate({
       model: 'googleai/gemini-2.0-flash-preview-image-generation',

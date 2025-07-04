@@ -42,7 +42,7 @@ const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clue
   const handleShareClick = () => {
     if (!isInteractive) {
         toast({
-            description: "You can only share your own card.",
+            description: "You can only share their card to find them.",
         });
         return;
     }
@@ -51,25 +51,30 @@ const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clue
 
   return (
     <Card ref={ref} className={cn(
-      "relative h-full min-h-[500px] w-full flex flex-col overflow-hidden shadow-2xl transition-colors duration-300", 
+      "relative h-full min-h-[500px] w-full flex flex-col overflow-hidden shadow-2xl transition-colors duration-300",
       !imageUrl && cardClass
-    )}
-    style={imageUrl ? {
-      backgroundImage: `url(${imageUrl})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-    } : {}}>
+    )}>
       {imageUrl && (
-        <div className="absolute inset-0 bg-black/50 z-10" /> 
+        <img
+          src={imageUrl}
+          alt="A cartoonish mascot in a scene representing the clues."
+          data-ai-hint="mascot illustration"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
       )}
       {!imageUrl && (
         <GhostIcon className={cn("absolute -right-12 -top-12 h-48 w-48 opacity-5", isDark ? 'text-white' : 'text-black')} />
       )}
       
-      <div className={cn("relative z-20 flex flex-col h-full", imageUrl && "text-white")}>
+      <div className={cn(
+        "relative z-10 flex h-full w-full flex-col",
+        imageUrl && "m-3 rounded-lg border border-white/20 bg-black/50 p-0 backdrop-blur-sm"
+      )}>
+
+        <div className={cn("flex h-full flex-col", imageUrl ? "text-white" : (isDark ? "text-white" : "text-card-foreground"))}>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <GhostIcon className={cn("h-8 w-8", imageUrl ? "text-white" : "text-accent-foreground")} />
+              <GhostIcon className={cn("h-8 w-8", imageUrl || isDark ? "text-white" : "text-accent")} />
               <h2 className="font-headline text-2xl font-bold">Ghost n seek</h2>
             </div>
             <p className={cn("opacity-80", imageUrl && "opacity-90")}>Can you find this person?</p>
@@ -77,36 +82,36 @@ const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clue
           <CardContent className="flex-grow p-4">
             <div className="h-full">
               {clues.length > 0 ? (
-                <div className={cn("p-4 rounded-lg flex flex-col h-full text-base", 
-                  imageUrl ? 'bg-white/20 backdrop-blur-sm' : (isDark ? 'bg-white/10' : 'bg-black/5')
+                <div className={cn("flex h-full flex-col rounded-lg p-4 text-base",
+                  imageUrl ? 'bg-transparent' : (isDark ? 'bg-white/10' : 'bg-black/5')
                 )}>
                   <p className="mb-3 font-semibold">We talked about:</p>
-                  <ol className="space-y-2 list-decimal list-inside pl-2 flex-grow">
+                  <ol className="flex-grow list-inside list-decimal space-y-2 pl-2">
                     {clues.map((clue, index) => (
                       <li key={index} className="group flex items-center justify-between gap-2">
                         <span className="flex-1">{clue.text}</span>
                         {isInteractive && (
-                            <Button
+                          <Button
                             variant="ghost"
                             size="icon"
-                            className={cn("h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex-shrink-0", 
-                                imageUrl || isDark ? "hover:bg-white/20" : "hover:bg-black/10"
+                            className={cn("h-7 w-7 flex-shrink-0 rounded-full opacity-0 transition-opacity group-hover:opacity-100",
+                              imageUrl || isDark ? "hover:bg-white/20" : "hover:bg-black/10"
                             )}
                             onClick={() => onRemoveClue(index)}
-                            >
+                          >
                             <Trash2 className="h-4 w-4" />
-                            </Button>
+                          </Button>
                         )}
                       </li>
                     ))}
                   </ol>
-                  <p className={cn("mt-4 pt-4 border-t text-center italic text-sm", 
-                    imageUrl ? 'border-white/20' : (isDark ? 'border-white/10' : 'border-black/10')
+                  <p className={cn("mt-4 border-t pt-4 text-center text-sm italic",
+                    imageUrl || isDark ? 'border-white/20' : 'border-black/10'
                   )}>Now find me on social media ;)</p>
                 </div>
               ) : (
-                 <div className={cn("flex h-full flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg", 
-                    imageUrl ? 'border-white/50 opacity-80' : `opacity-60 ${isDark ? 'border-white/20' : 'border-black/20'}`
+                <div className={cn("flex h-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 text-center",
+                  imageUrl ? 'border-white/50 opacity-80' : `opacity-60 ${isDark ? 'border-white/20' : 'border-black/20'}`
                 )}>
                   <p>Your clues will appear here.</p>
                   <p className="text-sm">Generate some to get started!</p>
@@ -114,12 +119,13 @@ const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clue
               )}
             </div>
           </CardContent>
-          <CardFooter className="p-4 mt-auto">
-            <Button onClick={handleShareClick} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold shadow-lg" disabled={clues.length === 0 || !isInteractive}>
+          <CardFooter className="mt-auto p-4">
+            <Button onClick={handleShareClick} className="w-full bg-accent font-bold text-accent-foreground shadow-lg hover:bg-accent/90" disabled={clues.length === 0 || !isInteractive}>
               <Share2 className="mr-2 h-4 w-4" />
-              {isInteractive ? 'Save & Share Card' : 'Partner Card'}
+              {isInteractive ? 'Save & Share Card' : 'Your Card'}
             </Button>
           </CardFooter>
+        </div>
       </div>
     </Card>
   );
