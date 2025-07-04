@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Image from "next/image";
-import { AlertCircle, CheckCircle, Ghost, Loader2, Sparkles, Wand2, Palette } from "lucide-react";
+import { AlertCircle, CheckCircle, Ghost, Loader2, Sparkles, Wand2, Palette, MessageSquareQuote } from "lucide-react";
 import {
   analyzeClue,
   generateSuggestions,
   getEmojiDna,
-  generateCardImage
+  generateCardImage,
+  generateCluesFromChatAction
 } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,6 +48,12 @@ type Clue = {
   emojis: string;
 };
 
+type Message = {
+  id: number;
+  sender: "me" | "them";
+  text: string;
+};
+
 export default function ClueCardPage() {
   const [clues, setClues] = useState<Clue[]>([]);
   const [currentClue, setCurrentClue] = useState("");
@@ -57,6 +64,24 @@ export default function ClueCardPage() {
 
   const [analysisState, analyzeClueAction] = useFormState(analyzeClue, null);
   const [suggestionState, generateSuggestionsAction] = useFormState(generateSuggestions, null);
+
+  const [chatHistory, setChatHistory] = useState<Message[]>([]);
+  const [isGeneratingFromChat, setIsGeneratingFromChat] = useState(false);
+  const [chatSuggestionState, setChatSuggestionState] = useState<{suggestions?: {clue: string, emojis: string}[], error?: string} | null>(null);
+
+  useEffect(() => {
+    const savedChatHistory = sessionStorage.getItem('chatHistory');
+    if (savedChatHistory) {
+      try {
+        const parsedHistory = JSON.parse(savedChatHistory);
+        setChatHistory(parsedHistory);
+        // Optional: clear it after use
+        // sessionStorage.removeItem('chatHistory');
+      } catch (e) {
+        console.error("Failed to parse chat history:", e);
+      }
+    }
+  }, []);
 
   const handleAddClue = async () => {
     const clueText = currentClue.trim();
@@ -69,6 +94,15 @@ export default function ClueCardPage() {
   
   const handleAddSuggestedClue = (suggestion: {clue: string, emojis: string}) => {
     setClues(prev => [...prev, { text: suggestion.clue, emojis: suggestion.emojis }]);
+  };
+
+  const handleGenerateCluesFromChat = async () => {
+    if (chatHistory.length === 0) return;
+    setIsGeneratingFromChat(true);
+    setChatSuggestionState(null);
+    const result = await generateCluesFromChatAction(chatHistory);
+    setChatSuggestionState(result);
+    setIsGeneratingFromChat(false);
   };
 
   const handleGenerateImage = async () => {
@@ -142,32 +176,64 @@ export default function ClueCardPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form action={generateSuggestionsAction} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="topic">Topic</Label>
-                      <Input id="topic" name="topic" placeholder="e.g., Hobbies, Music, Dreams" required/>
+                  {chatHistory.length > 0 ? (
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">We found your recent chat. Let AI find some interesting clues from it!</p>
+                      <Button onClick={handleGenerateCluesFromChat} disabled={isGeneratingFromChat} className="w-full">
+                          {isGeneratingFromChat ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <MessageSquareQuote className="mr-2 h-4 w-4"/>}
+                          {isGeneratingFromChat ? 'Analyzing Chat...' : 'Generate from Last Chat'}
+                      </Button>
+                      {chatSuggestionState?.suggestions && chatSuggestionState.suggestions.length > 0 && (
+                            <div className="mt-4 space-y-2">
+                              <h4 className="font-semibold">Here are some ideas from your chat:</h4>
+                              <div className="space-y-2">
+                                  {chatSuggestionState.suggestions.map((s, i) => (
+                                  <button key={i} onClick={() => handleAddSuggestedClue(s)} className="block w-full text-left p-2 rounded-md bg-muted hover:bg-accent/10 transition-colors text-sm">
+                                      <span className="mr-2">{s.emojis}</span>
+                                      &quot;{s.clue}&quot;
+                                  </button>
+                                  ))}
+                              </div>
+                          </div>
+                      )}
+                      {chatSuggestionState?.error && (
+                          <Alert variant="destructive" className="mt-4">
+                              <AlertCircle className="h-4 w-4" />
+                              <AlertTitle>Error</AlertTitle>
+                              <AlertDescription>{chatSuggestionState.error}</AlertDescription>
+                          </Alert>
+                      )}
                     </div>
-                    <SubmitButton startIcon={<Sparkles className="mr-2 h-4 w-4" />}>Get Suggestions</SubmitButton>
-                  </form>
-                  {suggestionState?.suggestions && suggestionState.suggestions.length > 0 && (
-                    <div className="mt-4 space-y-2">
-                      <h4 className="font-semibold">Here are some ideas:</h4>
-                      <div className="space-y-2">
-                        {suggestionState.suggestions.map((s, i) => (
-                          <button key={i} onClick={() => handleAddSuggestedClue(s)} className="block w-full text-left p-2 rounded-md bg-muted hover:bg-accent/10 transition-colors text-sm">
-                            <span className="mr-2">{s.emojis}</span>
-                            &quot;{s.clue}&quot;
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {suggestionState?.error && (
-                     <Alert variant="destructive" className="mt-4">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Error</AlertTitle>
-                        <AlertDescription>{suggestionState.error}</AlertDescription>
-                      </Alert>
+                  ) : (
+                    <>
+                      <form action={generateSuggestionsAction} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="topic">Topic</Label>
+                          <Input id="topic" name="topic" placeholder="e.g., Hobbies, Music, Dreams" required/>
+                        </div>
+                        <SubmitButton startIcon={<Sparkles className="mr-2 h-4 w-4" />}>Get Suggestions</SubmitButton>
+                      </form>
+                      {suggestionState?.suggestions && suggestionState.suggestions.length > 0 && (
+                        <div className="mt-4 space-y-2">
+                          <h4 className="font-semibold">Here are some ideas:</h4>
+                          <div className="space-y-2">
+                            {suggestionState.suggestions.map((s, i) => (
+                              <button key={i} onClick={() => handleAddSuggestedClue(s)} className="block w-full text-left p-2 rounded-md bg-muted hover:bg-accent/10 transition-colors text-sm">
+                                <span className="mr-2">{s.emojis}</span>
+                                &quot;{s.clue}&quot;
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {suggestionState?.error && (
+                        <Alert variant="destructive" className="mt-4">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>Error</AlertTitle>
+                            <AlertDescription>{suggestionState.error}</AlertDescription>
+                          </Alert>
+                      )}
+                    </>
                   )}
                 </CardContent>
               </Card>

@@ -8,6 +8,10 @@ import {
   generateClueCardSuggestions,
   GenerateClueCardSuggestionsOutput,
 } from "@/ai/flows/generate-clue-card-suggestions";
+import {
+  generateCluesFromChat,
+  GenerateCluesFromChatOutput,
+} from "@/ai/flows/generate-clues-from-chat";
 import { moderateChatMessage, ModerateChatMessageOutput } from "@/ai/flows/moderate-chat-message";
 import { generateEmojiDna, GenerateEmojiDnaOutput } from "@/ai/flows/generate-emoji-dna";
 import { generateClueCardImage, GenerateClueCardImageOutput } from "@/ai/flows/generate-clue-card-image";
@@ -20,6 +24,12 @@ const clueSchema = z.object({
 const topicSchema = z.object({
   topic: z.string().min(3, "Topic must be at least 3 characters long.").max(50, "Topic can't be more than 50 characters."),
 });
+
+type Message = {
+  id: number;
+  sender: "me" | "them";
+  text: string;
+};
 
 
 // Chat moderation
@@ -107,6 +117,28 @@ export async function generateSuggestions(
         return {
             suggestions: [],
             error: 'Could not generate suggestions. Please try again.'
+        }
+    }
+}
+
+export async function generateCluesFromChatAction(
+  chatHistory: Message[]
+): Promise<(GenerateCluesFromChatOutput & {error?: string})> {
+    if (!chatHistory || chatHistory.length === 0) {
+        return {
+            suggestions: [],
+            error: 'No chat history found to generate clues from.'
+        }
+    }
+
+    try {
+        const result = await generateCluesFromChat({ chatHistory: chatHistory.map(({id, ...rest}) => rest) });
+        return result;
+    } catch (error) {
+        console.error("Clue from chat generation error:", error)
+        return {
+            suggestions: [],
+            error: 'Could not generate clues from chat. Please try again.'
         }
     }
 }

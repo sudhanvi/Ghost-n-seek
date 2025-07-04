@@ -61,6 +61,12 @@ export default function ChatPage() {
   }, [status, timeLeft]);
 
   useEffect(() => {
+    if (status === 'ended' && messages.length > 1) {
+        sessionStorage.setItem('chatHistory', JSON.stringify(messages));
+    }
+  }, [status, messages]);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
