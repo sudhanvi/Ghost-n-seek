@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useActionState, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { AlertCircle, Ghost, Loader2, Sparkles, Palette, MessageSquareQuote } from "lucide-react";
+import { AlertCircle, Ghost, Loader2, Sparkles, Palette, MessageSquareQuote, Gem } from "lucide-react";
 import {
   generateSuggestions,
-  generateCluesFromChatAction
+  generateCluesFromChatAction,
+  generateImageForCard
 } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,6 +57,10 @@ export default function ClueCardPage() {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const cardPreviewRef = useRef<HTMLDivElement>(null);
 
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [imageGenerationError, setImageGenerationError] = useState<string | null>(null);
+
 
   useEffect(() => {
     const savedChatHistory = sessionStorage.getItem('chatHistory');
@@ -69,9 +74,15 @@ export default function ClueCardPage() {
     }
   }, []);
 
+  const handleCluesChange = (newClues: Clue[]) => {
+    setClues(newClues);
+    setGeneratedImage(null); // Reset image if clues change
+    setImageGenerationError(null);
+  }
+
   useEffect(() => {
     if (suggestionState?.suggestions) {
-      setClues(suggestionState.suggestions.map(s => ({text: s.clue, emojis: s.emojis})));
+      handleCluesChange(suggestionState.suggestions.map(s => ({text: s.clue, emojis: s.emojis})));
     }
   }, [suggestionState]);
   
@@ -79,13 +90,34 @@ export default function ClueCardPage() {
     if (chatHistory.length === 0) return;
     setIsGeneratingFromChat(true);
     setChatGenerationResult(null);
-    setClues([]);
+    handleCluesChange([]);
     const result = await generateCluesFromChatAction(chatHistory);
     setChatGenerationResult(result);
     if (result.suggestions) {
-      setClues(result.suggestions.map(s => ({text: s.clue, emojis: s.emojis})));
+      handleCluesChange(result.suggestions.map(s => ({text: s.clue, emojis: s.emojis})));
     }
     setIsGeneratingFromChat(false);
+  };
+
+  const handleGenerateImage = async () => {
+    if (clues.length === 0) {
+        setImageGenerationError("Please generate some clues first.");
+        return;
+    }
+    setIsGeneratingImage(true);
+    setImageGenerationError(null);
+    
+    const result = await generateImageForCard({
+        clues: clues.map(c => c.text),
+        colorPreference
+    });
+
+    if (result.error) {
+        setImageGenerationError(result.error);
+    } else {
+        setGeneratedImage(result.imageUrl!);
+    }
+    setIsGeneratingImage(false);
   };
 
   const handleShare = () => {
@@ -181,7 +213,7 @@ export default function ClueCardPage() {
                 </CardContent>
               </Card>
               
-               <Card className="sm:col-span-2">
+               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 font-headline">
                     <Palette className="text-accent"/>
@@ -205,6 +237,36 @@ export default function ClueCardPage() {
                     <p className="text-sm text-muted-foreground mt-2">This will influence the colors of your generated card image.</p>
                 </CardContent>
               </Card>
+              
+               <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 font-headline">
+                    <Gem className="text-accent" />
+                    Upgrade to Premium
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">Make your card unforgettable with a unique, AI-generated artwork.</p>
+                    <Button onClick={handleGenerateImage} disabled={isGeneratingImage || clues.length === 0} className="w-full">
+                        {isGeneratingImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4"/>}
+                        {isGeneratingImage ? 'Generating Artwork...' : 'Generate Premium Artwork'}
+                    </Button>
+                    {imageGenerationError && (
+                        <Alert variant="destructive" className="mt-4">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>Image Generation Failed</AlertTitle>
+                            <AlertDescription>{imageGenerationError}</AlertDescription>
+                        </Alert>
+                    )}
+                    {generatedImage && !isGeneratingImage && (
+                        <Alert className="mt-4">
+                            <Sparkles className="h-4 w-4" />
+                            <AlertTitle>Artwork Ready!</AlertTitle>
+                            <AlertDescription>Your premium card is ready to be shared.</AlertDescription>
+                        </Alert>
+                    )}
+                </CardContent>
+              </Card>
 
             </div>
           </div>
@@ -214,8 +276,9 @@ export default function ClueCardPage() {
               ref={cardPreviewRef}
               clues={clues} 
               colorPreference={colorPreference}
-              onRemoveClue={(index) => setClues(clues.filter((_, i) => i !== index))}
+              onRemoveClue={(index) => handleCluesChange(clues.filter((_, i) => i !== index))}
               onShare={handleShare}
+              imageUrl={generatedImage}
             />
           </div>
         </div>
