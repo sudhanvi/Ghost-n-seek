@@ -1,4 +1,4 @@
-# **App Name**: ClueConnect
+# **App Name**: Ghostnseek
 
 ## Core Features:
 
