@@ -33,7 +33,7 @@ export default function ClueCardPreview({ clues, onRemoveClue, onShare, isGenera
           {clues.length > 0 ? (
             <div className="bg-white/10 p-4 rounded-lg flex flex-col h-full text-base">
               <p className="mb-3 font-semibold">We talked about:</p>
-              <ul className="space-y-2 list-disc list-inside pl-2 flex-grow">
+              <ol className="space-y-2 list-decimal list-inside pl-2 flex-grow">
                 {clues.map((clue, index) => (
                   <li key={index} className="group flex items-center justify-between gap-2">
                     <span className="flex-1">{clue.text}</span>
@@ -47,13 +47,13 @@ export default function ClueCardPreview({ clues, onRemoveClue, onShare, isGenera
                     </Button>
                   </li>
                 ))}
-              </ul>
+              </ol>
               <p className="mt-4 pt-4 border-t border-white/10 text-center italic text-sm">Now find me on social media ;)</p>
             </div>
           ) : (
             <div className="flex h-full flex-col items-center justify-center text-center text-primary-foreground/60 p-8 border-2 border-dashed border-white/20 rounded-lg">
               <p>Your clues will appear here.</p>
-              <p className="text-sm">Add some from the left!</p>
+              <p className="text-sm">Generate some from the left!</p>
             </div>
           )}
         </div>

@@ -62,7 +62,7 @@ export default function ClueCardPage() {
 
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [isGeneratingFromChat, setIsGeneratingFromChat] = useState(false);
-  const [chatSuggestionState, setChatSuggestionState] = useState<{suggestions?: {clue: string, emojis: string}[], error?: string} | null>(null);
+  const [chatGenerationResult, setChatGenerationResult] = useState<{suggestions?: Clue[], error?: string} | null>(null);
 
   useEffect(() => {
     const savedChatHistory = sessionStorage.getItem('chatHistory');
@@ -70,24 +70,28 @@ export default function ClueCardPage() {
       try {
         const parsedHistory = JSON.parse(savedChatHistory);
         setChatHistory(parsedHistory);
-        // Optional: clear it after use
-        // sessionStorage.removeItem('chatHistory');
       } catch (e) {
         console.error("Failed to parse chat history:", e);
       }
     }
   }, []);
-  
-  const handleAddSuggestedClue = (suggestion: {clue: string, emojis: string}) => {
-    setClues(prev => [...prev, { text: suggestion.clue, emojis: suggestion.emojis }]);
-  };
 
+  useEffect(() => {
+    if (suggestionState?.suggestions) {
+      setClues(suggestionState.suggestions);
+    }
+  }, [suggestionState]);
+  
   const handleGenerateCluesFromChat = async () => {
     if (chatHistory.length === 0) return;
     setIsGeneratingFromChat(true);
-    setChatSuggestionState(null);
+    setChatGenerationResult(null);
+    setClues([]);
     const result = await generateCluesFromChatAction(chatHistory);
-    setChatSuggestionState(result);
+    setChatGenerationResult(result);
+    if (result.suggestions) {
+      setClues(result.suggestions);
+    }
     setIsGeneratingFromChat(false);
   };
 
@@ -135,25 +139,23 @@ export default function ClueCardPage() {
                           {isGeneratingFromChat ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <MessageSquareQuote className="mr-2 h-4 w-4"/>}
                           {isGeneratingFromChat ? 'Analyzing Chat...' : 'Generate from Last Chat'}
                       </Button>
-                      {chatSuggestionState?.suggestions && chatSuggestionState.suggestions.length > 0 && (
-                            <div className="mt-4 space-y-2">
-                              <h4 className="font-semibold">Here are some ideas from your chat:</h4>
-                              <div className="space-y-2">
-                                  {chatSuggestionState.suggestions.map((s, i) => (
-                                  <button key={i} onClick={() => handleAddSuggestedClue(s)} className="block w-full text-left p-2 rounded-md bg-muted hover:bg-accent/10 transition-colors text-sm">
-                                      <span className="mr-2">{s.emojis}</span>
-                                      &quot;{s.clue}&quot;
-                                  </button>
-                                  ))}
-                              </div>
-                          </div>
-                      )}
-                      {chatSuggestionState?.error && (
-                          <Alert variant="destructive" className="mt-4">
-                              <AlertCircle className="h-4 w-4" />
-                              <AlertTitle>Error</AlertTitle>
-                              <AlertDescription>{chatSuggestionState.error}</AlertDescription>
-                          </Alert>
+                      
+                      {chatGenerationResult && !isGeneratingFromChat && (
+                        <div className="mt-4">
+                            {chatGenerationResult.error ? (
+                                <Alert variant="destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertTitle>Error</AlertTitle>
+                                    <AlertDescription>{chatGenerationResult.error}</AlertDescription>
+                                </Alert>
+                            ) : (
+                                <Alert>
+                                    <Sparkles className="h-4 w-4" />
+                                    <AlertTitle>Success!</AlertTitle>
+                                    <AlertDescription>Your clues are ready. Check out the preview!</AlertDescription>
+                                </Alert>
+                            )}
+                        </div>
                       )}
                     </div>
                   ) : (
@@ -165,25 +167,22 @@ export default function ClueCardPage() {
                         </div>
                         <SubmitButton startIcon={<Sparkles className="mr-2 h-4 w-4" />}>Get Suggestions</SubmitButton>
                       </form>
-                      {suggestionState?.suggestions && suggestionState.suggestions.length > 0 && (
-                        <div className="mt-4 space-y-2">
-                          <h4 className="font-semibold">Here are some ideas:</h4>
-                          <div className="space-y-2">
-                            {suggestionState.suggestions.map((s, i) => (
-                              <button key={i} onClick={() => handleAddSuggestedClue(s)} className="block w-full text-left p-2 rounded-md bg-muted hover:bg-accent/10 transition-colors text-sm">
-                                <span className="mr-2">{s.emojis}</span>
-                                &quot;{s.clue}&quot;
-                              </button>
-                            ))}
-                          </div>
+                      {suggestionState && (
+                        <div className="mt-4">
+                            {suggestionState.error ? (
+                                <Alert variant="destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertTitle>Error</AlertTitle>
+                                    <AlertDescription>{suggestionState.error}</AlertDescription>
+                                </Alert>
+                            ) : (
+                               <Alert>
+                                    <Sparkles className="h-4 w-4" />
+                                    <AlertTitle>Success!</AlertTitle>
+                                    <AlertDescription>Your clues are ready. Check out the preview!</AlertDescription>
+                                </Alert>
+                            )}
                         </div>
-                      )}
-                      {suggestionState?.error && (
-                        <Alert variant="destructive" className="mt-4">
-                            <AlertCircle className="h-4 w-4" />
-                            <AlertTitle>Error</AlertTitle>
-                            <AlertDescription>{suggestionState.error}</AlertDescription>
-                          </Alert>
                       )}
                     </>
                   )}
