@@ -17,15 +17,16 @@ const MessageSchema = z.object({
 
 const GenerateCluesFromChatInputSchema = z.object({
   chatHistory: z.array(MessageSchema).describe("The full transcript of the chat conversation."),
+  targetSender: z.enum(['me', 'them']).describe("The sender to generate clues for."),
 });
 export type GenerateCluesFromChatInput = z.infer<typeof GenerateCluesFromChatInputSchema>;
 
-const SuggestionSchema = z.object({
+export const SuggestionSchema = z.object({
     clue: z.string().describe('The suggested clue text.'),
     emojis: z.string().describe('A unique string of 3-5 emojis that represents the clue.')
 });
 
-const GenerateCluesFromChatOutputSchema = z.object({
+export const GenerateCluesFromChatOutputSchema = z.object({
   suggestions: z.array(SuggestionSchema).describe('An array of clue suggestions derived from the chat, each with text and an emoji DNA string.'),
 });
 export type GenerateCluesFromChatOutput = z.infer<typeof GenerateCluesFromChatOutputSchema>;
@@ -38,10 +39,10 @@ const prompt = ai.definePrompt({
   name: 'generateCluesFromChatPrompt',
   input: {schema: GenerateCluesFromChatInputSchema},
   output: {schema: GenerateCluesFromChatOutputSchema},
-  prompt: `You are an expert NLP analyst and a creative clue-smith for a social deduction game called Ghost n seek. Your task is to analyze a chat transcript and generate compelling, non-identifying clues based on the user's (sender: "me") messages.
+  prompt: `You are an expert NLP analyst and a creative clue-smith for a social deduction game called Ghost n seek. Your task is to analyze a chat transcript and generate compelling, non-identifying clues based on the messages from the sender identified as "{{{targetSender}}}".
 
 **Analysis Process:**
-1.  **Entity and Keyword Extraction:** First, read the user's messages and perform entity recognition. Identify key nouns, verbs, and concepts. Extract keywords and topics of conversation. Ignore common filler words (e.g., "the", "a", "is", "I think").
+1.  **Entity and Keyword Extraction:** First, read the messages from "{{{targetSender}}}" and perform entity recognition. Identify key nouns, verbs, and concepts. Extract keywords and topics of conversation. Ignore common filler words (e.g., "the", "a", "is", "I think").
 2.  **Topic Clustering:** Group the extracted keywords and entities into 3-5 distinct, high-level topics. A topic should represent a unique interest, opinion, or experience. For example, keywords like "hike", "mountain", "trail" could be clustered under the topic "Hiking".
 3.  **Clue Synthesis:** For each clustered topic, synthesize a short, intriguing clue. The clue should be a punchy phrase that captures the essence of the topic, making it sound unique and personal (e.g., "Thinks mint chocolate is evil," or "Loves biking through Amsterdam"). These clues must have a high "rarity score" - meaning they are specific, not generic like "likes food".
 4.  **Context Preservation:** It is crucial to preserve the original context of the conversation. Do not generalize specific references. For example, if the user talks about "The Dark Knight's Joker", the clue should refer to that specific character, not a generic "chaotic clown" which could be misinterpreted as being about something else, like Stephen King's IT.
@@ -53,7 +54,7 @@ const prompt = ai.definePrompt({
 {{sender}}: {{text}}
 {{/each}}
 
-Based on your multi-step analysis, generate the clue suggestions.
+Based on your multi-step analysis of messages from "{{{targetSender}}}", generate the clue suggestions.
   `,
 });
 

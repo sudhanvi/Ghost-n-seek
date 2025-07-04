@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Ghost, Share2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface Clue {
   text: string;
@@ -17,9 +18,11 @@ interface ClueCardPreviewProps {
   onRemoveClue: (index: number) => void;
   onShare: () => void;
   imageUrl?: string | null;
+  isInteractive?: boolean;
 }
 
-const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clues, colorPreference, onRemoveClue, onShare, imageUrl }, ref) => {
+const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clues, colorPreference, onRemoveClue, onShare, imageUrl, isInteractive = true }, ref) => {
+  const { toast } = useToast();
   const colorSchemes: Record<string, string> = {
     Indigo: "bg-primary text-primary-foreground",
     Lavender: "bg-card-lavender text-card-lavender-foreground",
@@ -30,6 +33,16 @@ const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clue
 
   const cardClass = colorSchemes[colorPreference] || colorSchemes.Indigo;
   const isDark = colorPreference !== 'Lavender';
+
+  const handleShareClick = () => {
+    if (!isInteractive) {
+        toast({
+            description: "You can only share your own card.",
+        });
+        return;
+    }
+    onShare();
+  };
 
   return (
     <Card ref={ref} className={cn(
@@ -67,16 +80,18 @@ const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clue
                     {clues.map((clue, index) => (
                       <li key={index} className="group flex items-center justify-between gap-2">
                         <span className="flex-1">{clue.text}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className={cn("h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex-shrink-0", 
-                            imageUrl || isDark ? "hover:bg-white/20" : "hover:bg-black/10"
-                          )}
-                          onClick={() => onRemoveClue(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {isInteractive && (
+                            <Button
+                            variant="ghost"
+                            size="icon"
+                            className={cn("h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex-shrink-0", 
+                                imageUrl || isDark ? "hover:bg-white/20" : "hover:bg-black/10"
+                            )}
+                            onClick={() => onRemoveClue(index)}
+                            >
+                            <Trash2 className="h-4 w-4" />
+                            </Button>
+                        )}
                       </li>
                     ))}
                   </ol>
@@ -95,9 +110,9 @@ const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clue
             </div>
           </CardContent>
           <CardFooter className="p-4 mt-auto">
-            <Button onClick={onShare} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold shadow-lg" disabled={clues.length === 0}>
+            <Button onClick={handleShareClick} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold shadow-lg" disabled={clues.length === 0 || !isInteractive}>
               <Share2 className="mr-2 h-4 w-4" />
-              Save & Share Card
+              {isInteractive ? 'Save & Share Card' : 'Partner Card'}
             </Button>
           </CardFooter>
       </div>

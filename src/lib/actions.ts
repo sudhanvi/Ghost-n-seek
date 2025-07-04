@@ -6,7 +6,7 @@ import {
 } from '@/ai/flows/generate-clue-card-suggestions';
 import {
   generateCluesFromChat,
-  GenerateCluesFromChatOutput,
+  SuggestionSchema,
 } from '@/ai/flows/generate-clues-from-chat';
 import {
   moderateChatMessage,
@@ -84,25 +84,43 @@ export async function generateSuggestions(
   }
 }
 
-export async function generateCluesFromChatAction(
-  chatHistory: Message[]
-): Promise<GenerateCluesFromChatOutput & {error?: string}> {
+const Suggestion = z.infer<typeof SuggestionSchema>;
+export async function generateCluesFromChatAction(chatHistory: Message[]): Promise<{
+  userSuggestions: typeof Suggestion[];
+  partnerSuggestions: typeof Suggestion[];
+  error?: string;
+}> {
   if (!chatHistory || chatHistory.length === 0) {
     return {
-      suggestions: [],
+      userSuggestions: [],
+      partnerSuggestions: [],
       error: 'No chat history found to generate clues from.',
     };
   }
 
+  const chatHistoryWithoutId = chatHistory.map(({id, ...rest}) => rest);
+
   try {
-    const result = await generateCluesFromChat({
-      chatHistory: chatHistory.map(({id, ...rest}) => rest),
-    });
-    return result;
-  } catch (error) {
+    const [userResult, partnerResult] = await Promise.all([
+      generateCluesFromChat({
+        chatHistory: chatHistoryWithoutId,
+        targetSender: 'me',
+      }),
+      generateCluesFromChat({
+        chatHistory: chatHistoryWithoutId,
+        targetSender: 'them',
+      }),
+    ]);
+
+    return {
+      userSuggestions: userResult.suggestions,
+      partnerSuggestions: partnerResult.suggestions,
+    };
+  } catch (error: any) {
     console.error('Clue from chat generation error:', error);
     return {
-      suggestions: [],
+      userSuggestions: [],
+      partnerSuggestions: [],
       error: 'Could not generate clues from chat. Please try again.',
     };
   }
