@@ -3,11 +3,9 @@
 import { useState, useEffect, useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import Image from "next/image";
-import { AlertCircle, CheckCircle, Ghost, Loader2, Sparkles, Wand2, Palette, MessageSquareQuote } from "lucide-react";
+import { AlertCircle, Ghost, Loader2, Sparkles, Palette, MessageSquareQuote } from "lucide-react";
 import {
-  analyzeClue,
   generateSuggestions,
-  getEmojiDna,
   generateCardImage,
   generateCluesFromChatAction
 } from "@/lib/actions";
@@ -15,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ClueCardPreview from "@/components/ClueCardPreview";
 import {
@@ -56,13 +53,11 @@ type Message = {
 
 export default function ClueCardPage() {
   const [clues, setClues] = useState<Clue[]>([]);
-  const [currentClue, setCurrentClue] = useState("");
   const [colorPreference, setColorPreference] = useState("Indigo");
   
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<{url: string, error?: string} | null>(null);
 
-  const [analysisState, analyzeClueAction] = useActionState(analyzeClue, null);
   const [suggestionState, generateSuggestionsAction] = useActionState(generateSuggestions, null);
 
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
@@ -82,15 +77,6 @@ export default function ClueCardPage() {
       }
     }
   }, []);
-
-  const handleAddClue = async () => {
-    const clueText = currentClue.trim();
-    if (clueText && !analysisState?.hasIdentifyingInformation) {
-      const { emojis } = await getEmojiDna(clueText);
-      setClues((prev) => [...prev, { text: clueText, emojis: emojis }]);
-      setCurrentClue("");
-    }
-  };
   
   const handleAddSuggestedClue = (suggestion: {clue: string, emojis: string}) => {
     setClues(prev => [...prev, { text: suggestion.clue, emojis: suggestion.emojis }]);
@@ -134,45 +120,11 @@ export default function ClueCardPage() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 font-headline">
-                    <Wand2 className="text-accent"/>
-                    Add Your Clues
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form action={analyzeClueAction} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="clue">Enter a clue about yourself</Label>
-                      <Textarea
-                        id="clue"
-                        name="clue"
-                        placeholder="e.g., 'I have a secret talent for juggling.'"
-                        value={currentClue}
-                        onChange={(e) => setCurrentClue(e.target.value)}
-                        rows={3}
-                        required
-                      />
-                    </div>
-                    <SubmitButton startIcon={<CheckCircle className="mr-2 h-4 w-4" />}>Check Clue for Safety</SubmitButton>
-                  </form>
-                  {analysisState && (
-                    <Alert variant={analysisState.hasIdentifyingInformation ? "destructive" : "default"} className="mt-4 animate-in fade-in-50">
-                       {analysisState.hasIdentifyingInformation ? <AlertCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4 text-green-500"/>}
-                      <AlertTitle>{analysisState.hasIdentifyingInformation ? "Warning!" : "Looks Good!"}</AlertTitle>
-                      <AlertDescription>{analysisState.explanation || "This clue seems safe to use."}</AlertDescription>
-                    </Alert>
-                  )}
-                  <Button onClick={handleAddClue} className="mt-4 w-full" disabled={!currentClue || !!analysisState?.hasIdentifyingInformation}>Add Clue to Card</Button>
-                </CardContent>
-              </Card>
-
-              <Card>
+              <Card className="sm:col-span-2">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 font-headline">
                     <Sparkles className="text-accent" />
-                    Need Inspiration?
+                    Generate Your Clues
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -208,7 +160,7 @@ export default function ClueCardPage() {
                     <>
                       <form action={generateSuggestionsAction} className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="topic">Topic</Label>
+                          <Label htmlFor="topic">Or, get suggestions for a topic</Label>
                           <Input id="topic" name="topic" placeholder="e.g., Hobbies, Music, Dreams" required/>
                         </div>
                         <SubmitButton startIcon={<Sparkles className="mr-2 h-4 w-4" />}>Get Suggestions</SubmitButton>
