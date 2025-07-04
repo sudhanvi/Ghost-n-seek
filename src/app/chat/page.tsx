@@ -2,10 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Timer, X } from "lucide-react";
+import { Send, Timer, X, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef, FormEvent } from "react";
+import { moderateMessage } from "@/lib/actions";
+import { useToast } from "@/hooks/use-toast";
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 type Message = {
   id: number;
@@ -36,6 +39,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -77,20 +81,38 @@ export default function ChatPage() {
   }, [messages, status]);
 
 
-  const handleSendMessage = (e: FormEvent) => {
+  const handleSendMessage = async (e: FormEvent) => {
     e.preventDefault();
-    if (inputValue.trim()) {
-      setMessages([
-        ...messages,
-        { id: Date.now(), sender: "me", text: inputValue.trim() },
+    const text = inputValue.trim();
+    if (text) {
+      setInputValue(""); // Clear input immediately
+      
+      const moderationResult = await moderateMessage(text);
+      
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now(), sender: "me", text: moderationResult.moderatedMessage },
       ]);
-      setInputValue("");
     }
   };
 
   const handleEndChat = () => {
     setStatus("ended");
     setTimeLeft(0);
+  };
+  
+  const handleReportUser = async () => {
+    toast({
+        title: "Report Submitted",
+        description: "Thank you for helping keep our community safe. Our team will review this chat.",
+    });
+    // In a real app, this would also send a report to a backend service.
+    // Three reports against a user could trigger an automatic ban.
+    // We could use device fingerprinting to help enforce bans.
+    // Example:
+    // const fp = await FingerprintJS.load();
+    // const { visitorId } = await fp.get();
+    // sendReport(chatId, reportedUserId, visitorId);
   };
 
   const formatTime = (seconds: number) => {
@@ -137,10 +159,16 @@ export default function ChatPage() {
           </div>
           {timeLeft <= 120 && timeLeft > 60 && <span className="text-sm font-medium text-amber-600">2 minutes left!</span>}
         </div>
-        <Button variant="ghost" size="icon" onClick={handleEndChat}>
-          <X className="h-5 w-5" />
-          <span className="sr-only">End Chat</span>
-        </Button>
+        <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleReportUser} className="text-destructive border-destructive/50 hover:bg-destructive/10 hover:text-destructive">
+                <ShieldAlert className="h-4 w-4 mr-2" />
+                Report Ghost
+            </Button>
+            <Button variant="ghost" size="icon" onClick={handleEndChat}>
+              <X className="h-5 w-5" />
+              <span className="sr-only">End Chat</span>
+            </Button>
+        </div>
       </header>
 
       <main className="flex-1 overflow-y-auto p-4">

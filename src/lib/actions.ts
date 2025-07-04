@@ -8,6 +8,9 @@ import {
   generateClueCardSuggestions,
   GenerateClueCardSuggestionsOutput,
 } from "@/ai/flows/generate-clue-card-suggestions";
+import { moderateChatMessage, ModerateChatMessageOutput } from "@/ai/flows/moderate-chat-message";
+import { generateEmojiDna, GenerateEmojiDnaOutput } from "@/ai/flows/generate-emoji-dna";
+import { generateClueCardImage, GenerateClueCardImageOutput } from "@/ai/flows/generate-clue-card-image";
 import { z } from "zod";
 
 const clueSchema = z.object({
@@ -17,6 +20,41 @@ const clueSchema = z.object({
 const topicSchema = z.object({
   topic: z.string().min(3, "Topic must be at least 3 characters long.").max(50, "Topic can't be more than 50 characters."),
 });
+
+
+// Chat moderation
+export async function moderateMessage(message: string): Promise<ModerateChatMessageOutput> {
+  if (!message.trim()) return { isAppropriate: true, moderatedMessage: message };
+  try {
+    return await moderateChatMessage({ message });
+  } catch (error) {
+    console.error("Moderation error:", error);
+    return { isAppropriate: false, moderatedMessage: '🌟 This message was ghosted!' };
+  }
+}
+
+// Emoji DNA for custom clues
+export async function getEmojiDna(clue: string): Promise<GenerateEmojiDnaOutput> {
+    try {
+        return await generateEmojiDna({ clue });
+    } catch (error) {
+        console.error("Emoji DNA generation error:", error);
+        return { emojis: '✨' }; // Fallback emoji
+    }
+}
+
+// Clue Card Image Generation
+export async function generateCardImage(clues: string[], colorPreference: string): Promise<(GenerateClueCardImageOutput & { error?: string })> {
+    if (!clues || clues.length === 0) {
+        return { imageUrl: '', error: 'Please add at least one clue to generate an image.' };
+    }
+    try {
+        return await generateClueCardImage({ clues, colorPreference });
+    } catch (error) {
+        console.error("Card image generation error:", error);
+        return { imageUrl: '', error: 'Could not generate card image. Please try again later.' };
+    }
+}
 
 export async function analyzeClue(
   prevState: AnalyzeIdentifyingInformationOutput | null,
@@ -62,7 +100,8 @@ export async function generateSuggestions(
     }
 
     try {
-        const result = await generateClueCardSuggestions({ topic: validatedFields.data.topic });
+        const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        const result = await generateClueCardSuggestions({ topic: validatedFields.data.topic, currentDate });
         return result;
     } catch (error) {
         return {

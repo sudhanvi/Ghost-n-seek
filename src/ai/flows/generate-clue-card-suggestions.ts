@@ -12,11 +12,17 @@ import {z} from 'genkit';
 
 const GenerateClueCardSuggestionsInputSchema = z.object({
   topic: z.string().describe('The general topic to generate clues for.'),
+  currentDate: z.string().describe('The current date to provide temporal context for suggestions.'),
 });
 export type GenerateClueCardSuggestionsInput = z.infer<typeof GenerateClueCardSuggestionsInputSchema>;
 
+const SuggestionSchema = z.object({
+    clue: z.string().describe('The suggested clue text.'),
+    emojis: z.string().describe('A unique string of 3-5 emojis that represents the clue.')
+});
+
 const GenerateClueCardSuggestionsOutputSchema = z.object({
-  suggestions: z.array(z.string()).describe('An array of clue suggestions.'),
+  suggestions: z.array(SuggestionSchema).describe('An array of clue suggestions, each with text and an emoji DNA string.'),
 });
 export type GenerateClueCardSuggestionsOutput = z.infer<typeof GenerateClueCardSuggestionsOutputSchema>;
 
@@ -28,13 +34,19 @@ const prompt = ai.definePrompt({
   name: 'generateClueCardSuggestionsPrompt',
   input: {schema: GenerateClueCardSuggestionsInputSchema},
   output: {schema: GenerateClueCardSuggestionsOutputSchema},
-  prompt: `You are a creative assistant helping users generate clues about themselves for a social game.
+  prompt: `You are a creative assistant helping users generate clues about themselves for a social game called Ghost n seek. The clues should have a high "rarity score" - meaning they are unique and specific, not generic.
 
   The user is looking for clues related to the following topic: {{{topic}}}.
+  The current date is {{{currentDate}}}, use this for temporal context if relevant (e.g., recent events, holidays).
 
-  Generate five unique and interesting clue suggestions related to the topic. The clues should be short and engaging to pique interest without revealing too much personal information.
+  Generate five unique and interesting clue suggestions.
+  For each clue, also generate a creative and abstract "Emoji DNA" string (3-5 emojis) that symbolically represents the clue.
 
-  Format the output as a JSON array of strings.
+  Example for topic "Music":
+  - Clue: "I think the ending of the new sci-fi blockbuster was brilliant." (Temporal Context) -> Emojis: "🎬🤖🤔"
+  - Clue: "My go-to karaoke song is a power ballad from the 80s." (High Rarity) -> Emojis: "🎤👩‍🎤✨"
+
+  Focus on rarity and context. Avoid common, low-score clues like "I like pizza".
   `, config: {
     safetySettings: [
       {
