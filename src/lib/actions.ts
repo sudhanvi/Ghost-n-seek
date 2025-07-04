@@ -40,10 +40,12 @@ export async function generateCardImage(clues: string[], colorPreference: string
         return { imageUrl: '', error: 'Please add at least one clue to generate an image.' };
     }
     try {
-        return await generateClueCardImage({ clues, colorPreference });
+        const result = await generateClueCardImage({ clues, colorPreference });
+        return result;
     } catch (error) {
         console.error("Card image generation error:", error);
-        return { imageUrl: '', error: 'Could not generate card image. Please try again later.' };
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+        return { imageUrl: '', error: errorMessage };
     }
 }
 
