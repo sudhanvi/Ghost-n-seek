@@ -31,7 +31,7 @@ const generateClueCardImageFlow = ai.defineFlow(
     outputSchema: GenerateClueCardImageOutputSchema,
   },
   async ({clues, colorPreference}) => {
-    const prompt = `Generate a visually unique, abstract, and artistic illustration for a social deduction game's clue card. The style should be mysterious and ghostly, using a primary color theme of ${colorPreference}. The illustration should be inspired by the following concepts without being literal: ${clues.join(", ")}. The final image should have an aspect ratio of 9:16 and look like a digital art piece, not a photo.`;
+    const prompt = `Generate a visually unique, abstract, and artistic illustration for a social deduction game's clue card. The style should be mysterious and ghostly, using a primary color theme of ${colorPreference}. The illustration should be a symbolic and abstract representation of the following concepts, weaving them together into a cohesive artwork: ${clues.join(", ")}. The final image should have an aspect ratio of 9:16 and look like a digital art piece, not a photo.`;
 
     const response = await ai.generate({
       model: 'googleai/gemini-2.0-flash-preview-image-generation',

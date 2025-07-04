@@ -64,7 +64,6 @@ export default function ClueCardPage() {
   const [partnerClues, setPartnerClues] = useState<Clue[]>([]);
   
   const [colorPreference, setColorPreference] = useState("Indigo");
-  const [userCardColor, setUserCardColor] = useState("Indigo");
   
   const [suggestionState, generateSuggestionsAction] = useActionState(generateSuggestions, null);
 
@@ -74,6 +73,8 @@ export default function ClueCardPage() {
 
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const cardPreviewRef = useRef<HTMLDivElement>(null);
+  const cardsPreviewRef = useRef<HTMLDivElement>(null);
+
 
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -100,14 +101,27 @@ export default function ClueCardPage() {
     setImageGenerationError(null);
   }
 
+  const hasPartnerClues = (chatGenerationResult?.partnerSuggestions?.length ?? 0) > 0;
+  const hasUserCluesFromTopic = (suggestionState?.suggestions?.length ?? 0) > 0;
+
   useEffect(() => {
-    if (suggestionState?.suggestions) {
+    if ((suggestionState?.suggestions?.length || 0) > 0) {
       // Topic generation is for making a card about YOURSELF
       setUserClues(suggestionState.suggestions.map(s => ({text: s.clue, emojis: s.emojis})));
-      setPartnerClues([]); 
+      setPartnerClues([]); // Clear partner clues when generating for self
     }
   }, [suggestionState]);
   
+  useEffect(() => {
+    if (!isGeneratingFromChat && (hasPartnerClues || hasUserCluesFromTopic)) {
+      // A small timeout helps ensure the DOM is updated before we try to scroll.
+      setTimeout(() => {
+        cardsPreviewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+  }, [hasPartnerClues, hasUserCluesFromTopic, isGeneratingFromChat]);
+
+
   const handleGenerateCluesFromChat = async () => {
     if (chatHistory.length === 0) return;
     setIsGeneratingFromChat(true);
@@ -116,6 +130,7 @@ export default function ClueCardPage() {
     handlePartnerCluesChange([]);
 
     const result = await generateCluesFromChatAction(chatHistory);
+    
     setChatGenerationResult(result);
     if (result.userSuggestions) {
       setUserClues(result.userSuggestions.map(s => ({text: s.clue, emojis: s.emojis})));
@@ -123,10 +138,6 @@ export default function ClueCardPage() {
     if (result.partnerSuggestions) {
       handlePartnerCluesChange(result.partnerSuggestions.map(s => ({text: s.clue, emojis: s.emojis})));
     }
-    
-    // Set a random color for the user's card that is different from the partner's
-    const availableColors = colorOptions.filter(c => c !== colorPreference);
-    setUserCardColor(availableColors[Math.floor(Math.random() * availableColors.length)]);
     
     setIsGeneratingFromChat(false);
   };
@@ -231,7 +242,7 @@ export default function ClueCardPage() {
                     <CardHeader>
                     <CardTitle className="flex items-center gap-2 font-headline">
                         <Palette className="text-accent"/>
-                        2. Style The Card You'll Share
+                        2. Style Their Card
                     </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -258,7 +269,7 @@ export default function ClueCardPage() {
                     </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-muted-foreground mb-4">Make the card unforgettable with a unique, AI-generated artwork.</p>
+                        <p className="text-sm text-muted-foreground mb-4">Make their card unforgettable with a unique, AI-generated artwork.</p>
                         <Button onClick={handleGenerateImage} disabled={isGeneratingImage || partnerClues.length === 0} className="w-full">
                             {isGeneratingImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4"/>}
                             {isGeneratingImage ? 'Generating Artwork...' : 'Generate Premium Artwork'}
@@ -299,7 +310,7 @@ export default function ClueCardPage() {
                 <AdPlacement />
             </div>
             
-            <div className="lg:col-span-3 space-y-8">
+            <div ref={cardsPreviewRef} className="lg:col-span-3 space-y-8">
                 <div>
                     <h2 className="text-2xl font-headline font-bold text-center mb-4 text-primary">Their Card (Share this to find them!)</h2>
                     <ClueCardPreview 
@@ -316,7 +327,7 @@ export default function ClueCardPage() {
                     <h2 className="text-2xl font-headline font-bold text-center mb-4 text-primary">Your Card (What they might be looking for)</h2>
                     <ClueCardPreview 
                         clues={userClues} 
-                        colorPreference={userCardColor}
+                        colorPreference={"Indigo"}
                         onRemoveClue={() => {}}
                         onShare={() => {}}
                         isInteractive={false}
