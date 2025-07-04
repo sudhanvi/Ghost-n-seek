@@ -142,64 +142,64 @@ export default function ClueCardPage() {
 
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-screen-2xl">
         <header className="mb-8 text-center">
           <h1 className="font-headline text-4xl font-bold text-primary md:text-5xl">Craft Your Clue Card</h1>
           <p className="mt-2 text-lg text-foreground/80">Generate clues from your chat to see if you can find each other again!</p>
         </header>
 
-        <div className="space-y-8">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline">
-                        <Sparkles className="text-accent" />
-                        1. Generate Your Clues
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {chatHistory.length > 0 ? (
-                        <div className="space-y-4 p-4 rounded-lg border bg-card-foreground/5">
-                            <h3 className="font-semibold text-lg flex items-center gap-2"><Users className="h-5 w-5"/>From Your Chat</h3>
-                            <p className="text-sm text-muted-foreground">The best way to find your connection! We'll analyze your chat and generate cards for both of you.</p>
-                            <Button onClick={handleGenerateCluesFromChat} disabled={isGeneratingFromChat} className="w-full">
-                                {isGeneratingFromChat ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <MessageSquareQuote className="mr-2 h-4 w-4"/>}
-                                {isGeneratingFromChat ? 'Analyzing Chat...' : 'Generate Clue Cards'}
-                            </Button>
-                        </div>
-                    ) : (
-                        <div className="space-y-4 p-4 rounded-lg border bg-card-foreground/5">
-                           <h3 className="font-semibold text-lg flex items-center gap-2"><Ghost className="h-5 w-5"/>No Chat Found</h3>
-                           <p className="text-sm text-muted-foreground">Complete a chat session to generate cards from your conversation. For now, you can generate suggestions based on a topic.</p>
-                        </div>
-                    )}
-                     <div className="space-y-4 p-4 rounded-lg border bg-card-foreground/5">
-                        <h3 className="font-semibold text-lg flex items-center gap-2"><Sparkles className="h-5 w-5"/>From a Topic</h3>
-                        <form action={generateSuggestionsAction} className="space-y-4">
-                            <p className="text-sm text-muted-foreground">Get some ideas for your own card based on a topic. Note: This will not generate a card for your partner.</p>
-                            <div className="space-y-2">
-                            <Label htmlFor="topic">Enter a topic</Label>
-                            <Input id="topic" name="topic" placeholder="e.g., Hobbies, Music, Dreams" required/>
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <div className="lg:col-span-2 space-y-8">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 font-headline">
+                            <Sparkles className="text-accent" />
+                            1. Generate Your Clues
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 gap-6">
+                        {chatHistory.length > 0 ? (
+                            <div className="space-y-4 p-4 rounded-lg border bg-card-foreground/5">
+                                <h3 className="font-semibold text-lg flex items-center gap-2"><Users className="h-5 w-5"/>From Your Chat</h3>
+                                <p className="text-sm text-muted-foreground">The best way to find your connection! We'll analyze your chat and generate cards for both of you.</p>
+                                <Button onClick={handleGenerateCluesFromChat} disabled={isGeneratingFromChat} className="w-full">
+                                    {isGeneratingFromChat ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <MessageSquareQuote className="mr-2 h-4 w-4"/>}
+                                    {isGeneratingFromChat ? 'Analyzing Chat...' : 'Generate Clue Cards'}
+                                </Button>
                             </div>
-                            <SubmitButton>Get Suggestions</SubmitButton>
-                        </form>
-                    </div>
-                </CardContent>
-                 <CardContent>
-                    {chatGenerationResult && !isGeneratingFromChat && (
-                        <div className="mt-4">
-                            {chatGenerationResult.error ? ( <Alert variant="destructive"> <AlertCircle className="h-4 w-4" /> <AlertTitle>Error</AlertTitle> <AlertDescription>{chatGenerationResult.error}</AlertDescription> </Alert> ) : 
-                            (chatGenerationResult.userSuggestions && chatGenerationResult.userSuggestions.length > 0) || (chatGenerationResult.partnerSuggestions && chatGenerationResult.partnerSuggestions.length > 0) ? ( <Alert> <Sparkles className="h-4 w-4" /> <AlertTitle>Success!</AlertTitle> <AlertDescription>Your clue cards are ready below! You can now customize your card's look.</AlertDescription> </Alert> ) : ( <Alert variant="destructive"> <AlertCircle className="h-4 w-4" /> <AlertTitle>Not much to go on...</AlertTitle> <AlertDescription>We couldn't find enough unique topics in the chat. Try chatting a bit more next time, or generate clues from a topic.</AlertDescription> </Alert> )}
+                        ) : (
+                            <div className="space-y-4 p-4 rounded-lg border bg-card-foreground/5">
+                            <h3 className="font-semibold text-lg flex items-center gap-2"><Ghost className="h-5 w-5"/>No Chat Found</h3>
+                            <p className="text-sm text-muted-foreground">Complete a chat session to generate cards from your conversation. For now, you can generate suggestions based on a topic.</p>
+                            </div>
+                        )}
+                        <div className="space-y-4 p-4 rounded-lg border bg-card-foreground/5">
+                            <h3 className="font-semibold text-lg flex items-center gap-2"><Sparkles className="h-5 w-5"/>From a Topic</h3>
+                            <form action={generateSuggestionsAction} className="space-y-4">
+                                <p className="text-sm text-muted-foreground">Get some ideas for your own card based on a topic. Note: This will not generate a card for your partner.</p>
+                                <div className="space-y-2">
+                                <Label htmlFor="topic">Enter a topic</Label>
+                                <Input id="topic" name="topic" placeholder="e.g., Hobbies, Music, Dreams" required/>
+                                </div>
+                                <SubmitButton>Get Suggestions</SubmitButton>
+                            </form>
                         </div>
-                    )}
-                    {suggestionState && (
-                        <div className="mt-4">
-                            {suggestionState.error ? ( <Alert variant="destructive"> <AlertCircle className="h-4 w-4" /> <AlertTitle>Error</AlertTitle> <AlertDescription>{suggestionState.error}</AlertDescription> </Alert> ) : suggestionState.suggestions && suggestionState.suggestions.length > 0 ? ( <Alert> <Sparkles className="h-4 w-4" /> <AlertTitle>Success!</AlertTitle> <AlertDescription>Your clues are ready. Check out your card preview below!</AlertDescription> </Alert> ) : ( <Alert variant="destructive"> <AlertCircle className="h-4 w-4" /> <AlertTitle>No Suggestions Found</AlertTitle> <AlertDescription>We couldn't find any suggestions for that topic. Please try a different one.</AlertDescription> </Alert> )}
-                        </div>
-                    )}
-                 </CardContent>
-            </Card>
+                    </CardContent>
+                    <CardContent>
+                        {chatGenerationResult && !isGeneratingFromChat && (
+                            <div className="mt-4">
+                                {chatGenerationResult.error ? ( <Alert variant="destructive"> <AlertCircle className="h-4 w-4" /> <AlertTitle>Error</AlertTitle> <AlertDescription>{chatGenerationResult.error}</AlertDescription> </Alert> ) : 
+                                (chatGenerationResult.userSuggestions && chatGenerationResult.userSuggestions.length > 0) || (chatGenerationResult.partnerSuggestions && chatGenerationResult.partnerSuggestions.length > 0) ? ( <Alert> <Sparkles className="h-4 w-4" /> <AlertTitle>Success!</AlertTitle> <AlertDescription>Your clue cards are ready on the right! You can now customize your card's look.</AlertDescription> </Alert> ) : ( <Alert variant="destructive"> <AlertCircle className="h-4 w-4" /> <AlertTitle>Not much to go on...</AlertTitle> <AlertDescription>We couldn't find enough unique topics in the chat. Try chatting a bit more next time, or generate clues from a topic.</AlertDescription> </Alert> )}
+                            </div>
+                        )}
+                        {suggestionState && (
+                            <div className="mt-4">
+                                {suggestionState.error ? ( <Alert variant="destructive"> <AlertCircle className="h-4 w-4" /> <AlertTitle>Error</AlertTitle> <AlertDescription>{suggestionState.error}</AlertDescription> </Alert> ) : suggestionState.suggestions && suggestionState.suggestions.length > 0 ? ( <Alert> <Sparkles className="h-4 w-4" /> <AlertTitle>Success!</AlertTitle> <AlertDescription>Your clues are ready. Check out your card preview on the right!</AlertDescription> </Alert> ) : ( <Alert variant="destructive"> <AlertCircle className="h-4 w-4" /> <AlertTitle>No Suggestions Found</AlertTitle> <AlertDescription>We couldn't find any suggestions for that topic. Please try a different one.</AlertDescription> </Alert> )}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <Card>
                     <CardHeader>
                     <CardTitle className="flex items-center gap-2 font-headline">
@@ -269,11 +269,12 @@ export default function ClueCardPage() {
                         </Button>
                     </CardContent>
                 </Card>
+                <AdPlacement />
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="lg:col-span-3 space-y-8">
                 <div>
-                    <h2 className="text-2xl font-headline font-bold text-center mb-4 text-primary">Your Card</h2>
+                    <h2 className="text-2xl font-headline font-bold text-center mb-4 text-primary">Your Card (for them to find you)</h2>
                     <ClueCardPreview 
                         ref={cardPreviewRef}
                         clues={userClues} 
@@ -285,7 +286,7 @@ export default function ClueCardPage() {
                     />
                 </div>
                 <div>
-                    <h2 className="text-2xl font-headline font-bold text-center mb-4 text-primary">Your Partner's Card</h2>
+                    <h2 className="text-2xl font-headline font-bold text-center mb-4 text-primary">Their Card (for you to find them)</h2>
                     <ClueCardPreview 
                         clues={partnerClues} 
                         colorPreference={partnerColorPreference}
@@ -296,9 +297,6 @@ export default function ClueCardPage() {
                 </div>
             </div>
         </div>
-        
-        <AdPlacement />
-
       </div>
       
       <ShareDialog

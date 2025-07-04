@@ -3,9 +3,14 @@
 import { forwardRef } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Ghost, Share2, Trash2 } from "lucide-react";
+import { Share2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+
+const GhostIcon = ({className}: {className?: string}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 1 1 0-8c-2 0-4 1.33-6 4Z"/><path d="M18 11.5a4.5 4.5 0 0 1 0-9 4.5 4.5 0 0 1 0 9Z"/><path d="M6 11.5a4.5 4.5 0 0 1 0-9 4.5 4.5 0 0 1 0 9Z"/></svg>
+);
+
 
 interface Clue {
   text: string;
@@ -58,13 +63,13 @@ const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clue
         <div className="absolute inset-0 bg-black/50 z-10" /> 
       )}
       {!imageUrl && (
-        <Ghost className={cn("absolute -right-12 -top-12 h-48 w-48 opacity-5", isDark ? 'text-white' : 'text-black')} />
+        <GhostIcon className={cn("absolute -right-12 -top-12 h-48 w-48 opacity-5", isDark ? 'text-white' : 'text-black')} />
       )}
       
       <div className={cn("relative z-20 flex flex-col h-full", imageUrl && "text-white")}>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Ghost className={cn("h-8 w-8", imageUrl ? "text-white" : "text-accent")} />
+              <GhostIcon className={cn("h-8 w-8", imageUrl ? "text-white" : "text-accent-foreground")} />
               <h2 className="font-headline text-2xl font-bold">Ghost n seek</h2>
             </div>
             <p className={cn("opacity-80", imageUrl && "opacity-90")}>Can you find this person?</p>
@@ -104,7 +109,7 @@ const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clue
                     imageUrl ? 'border-white/50 opacity-80' : `opacity-60 ${isDark ? 'border-white/20' : 'border-black/20'}`
                 )}>
                   <p>Your clues will appear here.</p>
-                  <p className="text-sm">Generate some from the left!</p>
+                  <p className="text-sm">Generate some to get started!</p>
                 </div>
               )}
             </div>
