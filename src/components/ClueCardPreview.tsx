@@ -3,7 +3,7 @@
 import { forwardRef } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Share2, Trash2 } from "lucide-react";
+import { Share2, Trash2, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -28,16 +28,15 @@ interface ClueCardPreviewProps {
 
 const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clues, colorPreference, onRemoveClue, onShare, imageUrl, isInteractive = true }, ref) => {
   const { toast } = useToast();
-  const colorSchemes: Record<string, string> = {
-    Indigo: "bg-primary text-primary-foreground",
-    Lavender: "bg-card-lavender text-card-lavender-foreground",
-    Purple: "bg-accent text-accent-foreground",
-    Crimson: "bg-card-crimson text-card-crimson-foreground",
-    Teal: "bg-card-teal text-card-teal-foreground",
+  const colorSchemes: Record<string, { card: string, isDark: boolean }> = {
+    Indigo: { card: "bg-primary text-primary-foreground", isDark: true },
+    Lavender: { card: "bg-card-lavender text-card-lavender-foreground", isDark: false },
+    Purple: { card: "bg-accent text-accent-foreground", isDark: true },
+    Crimson: { card: "bg-card-crimson text-card-crimson-foreground", isDark: true },
+    Teal: { card: "bg-card-teal text-card-teal-foreground", isDark: true },
   };
 
-  const cardClass = colorSchemes[colorPreference] || colorSchemes.Indigo;
-  const isDark = colorPreference !== 'Lavender';
+  const { card: cardClass, isDark } = colorSchemes[colorPreference] || colorSchemes.Indigo;
 
   const handleShareClick = () => {
     if (!isInteractive) {
@@ -50,83 +49,67 @@ const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clue
   };
 
   return (
-    <Card ref={ref} className={cn(
-      "relative h-full min-h-[500px] w-full flex flex-col overflow-hidden shadow-2xl transition-colors duration-300",
-      !imageUrl && cardClass
-    )}>
-      {imageUrl && (
-        <img
-          src={imageUrl}
-          alt="A cartoonish mascot in a scene representing the clues."
-          data-ai-hint="mascot illustration"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-      )}
-      {!imageUrl && (
-        <GhostIcon className={cn("absolute -right-12 -top-12 h-48 w-48 opacity-5", isDark ? 'text-white' : 'text-black')} />
-      )}
-      
-      <div className={cn(
-        "relative z-10 flex h-full w-full flex-col",
-        imageUrl && "m-3 rounded-lg border border-white/20 bg-black/50 p-0 backdrop-blur-sm"
-      )}>
-
-        <div className={cn("flex h-full flex-col", imageUrl ? "text-white" : (isDark ? "text-white" : "text-card-foreground"))}>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <GhostIcon className={cn("h-8 w-8", imageUrl || isDark ? "text-white" : "text-accent")} />
-              <h2 className="font-headline text-2xl font-bold">Ghost n seek</h2>
-            </div>
-            <p className={cn("opacity-80", imageUrl && "opacity-90")}>Can you find this person?</p>
-          </CardHeader>
-          <CardContent className="flex-grow p-4">
-            <div className="h-full">
-              {clues.length > 0 ? (
-                <div className={cn("flex h-full flex-col rounded-lg p-4 text-base",
-                  imageUrl ? 'bg-transparent' : (isDark ? 'bg-white/10' : 'bg-black/5')
-                )}>
-                  <p className="mb-3 font-semibold">We talked about:</p>
-                  <ol className="flex-grow list-inside list-decimal space-y-2 pl-2">
-                    {clues.map((clue, index) => (
-                      <li key={index} className="group flex items-center justify-between gap-2">
-                        <span className="flex-1">{clue.text}</span>
-                        {isInteractive && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className={cn("h-7 w-7 flex-shrink-0 rounded-full opacity-0 transition-opacity group-hover:opacity-100",
-                              imageUrl || isDark ? "hover:bg-white/20" : "hover:bg-black/10"
-                            )}
-                            onClick={() => onRemoveClue(index)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </li>
-                    ))}
-                  </ol>
-                  <p className={cn("mt-4 border-t pt-4 text-center text-sm italic",
-                    imageUrl || isDark ? 'border-white/20' : 'border-black/10'
-                  )}>Now find me on social media ;)</p>
+    <Card ref={ref} className="w-full max-w-sm mx-auto flex flex-col overflow-hidden shadow-2xl p-0">
+        <div className={cn("aspect-[9/16] w-full relative bg-muted flex items-center justify-center", !imageUrl && cardClass)}>
+            {imageUrl ? (
+                <img
+                    src={imageUrl}
+                    alt="A cartoonish mascot in a scene representing the clues."
+                    data-ai-hint="mascot illustration"
+                    className="absolute inset-0 w-full h-full object-cover"
+                />
+            ) : (
+                <div className="flex flex-col items-center justify-center text-center p-8">
+                    <ImageIcon className={cn("h-16 w-16 opacity-50", isDark ? "text-white" : "text-black")} />
+                    <p className="mt-4 font-semibold text-lg">Your Artwork Here</p>
+                    <p className="text-sm opacity-80">Generate a premium card to see a unique image based on these clues!</p>
                 </div>
-              ) : (
-                <div className={cn("flex h-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 text-center",
-                  imageUrl ? 'border-white/50 opacity-80' : `opacity-60 ${isDark ? 'border-white/20' : 'border-black/20'}`
-                )}>
-                  <p>Your clues will appear here.</p>
-                  <p className="text-sm">Generate some to get started!</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter className="mt-auto p-4">
-            <Button onClick={handleShareClick} className="w-full bg-accent font-bold text-accent-foreground shadow-lg hover:bg-accent/90" disabled={clues.length === 0 || !isInteractive}>
-              <Share2 className="mr-2 h-4 w-4" />
-              {isInteractive ? 'Save & Share Card' : 'Your Card'}
-            </Button>
-          </CardFooter>
+            )}
         </div>
-      </div>
+        <div className="p-4 sm:p-6 flex flex-col flex-grow bg-card text-card-foreground">
+            <CardHeader className="p-0 mb-4">
+                <div className="flex items-center gap-2">
+                    <GhostIcon className="h-8 w-8 text-accent" />
+                    <h2 className="font-headline text-2xl font-bold">Ghost n seek</h2>
+                </div>
+                <p className="text-muted-foreground">Can you find this person?</p>
+            </CardHeader>
+            <CardContent className="flex-grow p-0 min-h-[150px]">
+                {clues.length > 0 ? (
+                    <div className="flex h-full flex-col text-base">
+                        <p className="mb-3 font-semibold text-card-foreground/90">We talked about:</p>
+                        <ol className="flex-grow list-inside list-decimal space-y-2 pl-2">
+                            {clues.map((clue, index) => (
+                                <li key={index} className="group flex items-center justify-between gap-2 text-card-foreground">
+                                    <span className="flex-1">{clue.text}</span>
+                                    {isInteractive && (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-7 w-7 flex-shrink-0 rounded-full opacity-0 transition-opacity group-hover:opacity-100 hover:bg-muted"
+                                            onClick={() => onRemoveClue(index)}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    )}
+                                </li>
+                            ))}
+                        </ol>
+                    </div>
+                ) : (
+                    <div className="flex h-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center text-muted-foreground">
+                        <p>Your clues will appear here.</p>
+                        <p className="text-sm">Generate some to get started!</p>
+                    </div>
+                )}
+            </CardContent>
+            <CardFooter className="mt-auto p-0 pt-6">
+                <Button onClick={handleShareClick} className="w-full bg-accent font-bold text-accent-foreground shadow-lg hover:bg-accent/90" disabled={clues.length === 0 || !isInteractive}>
+                    <Share2 className="mr-2 h-4 w-4" />
+                    {isInteractive ? 'Save & Share Card' : 'Your Card'}
+                </Button>
+            </CardFooter>
+        </div>
     </Card>
   );
 });
