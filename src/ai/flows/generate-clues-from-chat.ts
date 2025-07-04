@@ -38,23 +38,21 @@ const prompt = ai.definePrompt({
   name: 'generateCluesFromChatPrompt',
   input: {schema: GenerateCluesFromChatInputSchema},
   output: {schema: GenerateCluesFromChatOutputSchema},
-  prompt: `You are a master clue-smith for a social deduction game called Ghost n seek. Your primary goal is to analyze a chat transcript and identify **unique topics of conversation** from the user (sender: "me") that can be turned into compelling, non-identifying clues.
+  prompt: `You are an expert NLP analyst and a creative clue-smith for a social deduction game called Ghost n seek. Your task is to analyze a chat transcript and generate compelling, non-identifying clues based on the user's (sender: "me") messages.
 
-A "unique topic" is something that reveals personality, a unique opinion, a specific interest, a memorable experience, or a niche piece of knowledge. Your generated clues should be based *directly* on these topics.
-
-**Your Task:**
-1.  Read the entire chat history provided below.
-2.  Identify 3 to 5 **unique topics** or statements from the user ("me").
-3.  For each topic, summarize it as a short, punchy phrase (e.g., "Biking in Amsterdam", "Mint chocolate is evil"). The clue must be interesting and have a high "rarity score" – it should be specific, not generic.
-4.  For each clue, generate a creative and abstract "Emoji DNA" string (3-5 emojis) that symbolically represents it.
-5.  **Crucially, do not extract any potentially identifying information** (names, locations, contact info, etc.).
+**Analysis Process:**
+1.  **Entity and Keyword Extraction:** First, read the user's messages and perform entity recognition. Identify key nouns, verbs, and concepts. Extract keywords and topics of conversation. Ignore common filler words (e.g., "the", "a", "is", "I think").
+2.  **Topic Clustering:** Group the extracted keywords and entities into 3-5 distinct, high-level topics. A topic should represent a unique interest, opinion, or experience. For example, keywords like "hike", "mountain", "trail" could be clustered under the topic "Hiking".
+3.  **Clue Synthesis:** For each clustered topic, synthesize a short, intriguing clue. The clue should be a punchy phrase that captures the essence of the topic, making it sound unique and personal (e.g., "Thinks mint chocolate is evil," or "Loves biking through Amsterdam"). These clues must have a high "rarity score" - meaning they are specific, not generic like "likes food".
+4.  **Emoji DNA:** For each synthesized clue, create a unique and abstract "Emoji DNA" string (3-5 emojis) that symbolically represents it.
+5.  **Safety First:** Absolutely do not extract any Personally Identifiable Information (PII) like names, specific locations (unless it's a very famous public place like "Eiffel Tower"), contact details, etc.
 
 **Chat History:**
 {{#each chatHistory}}
 {{sender}}: {{text}}
 {{/each}}
 
-Based on your analysis, generate the clue suggestions.
+Based on your multi-step analysis, generate the clue suggestions.
   `,
 });
 

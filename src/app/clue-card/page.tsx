@@ -62,7 +62,7 @@ export default function ClueCardPage() {
 
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [isGeneratingFromChat, setIsGeneratingFromChat] = useState(false);
-  const [chatGenerationResult, setChatGenerationResult] = useState<{suggestions?: Clue[], error?: string} | null>(null);
+  const [chatGenerationResult, setChatGenerationResult] = useState<{suggestions?: {clue: string, emojis: string}[], error?: string} | null>(null);
 
   useEffect(() => {
     const savedChatHistory = sessionStorage.getItem('chatHistory');
@@ -78,7 +78,7 @@ export default function ClueCardPage() {
 
   useEffect(() => {
     if (suggestionState?.suggestions) {
-      setClues(suggestionState.suggestions);
+      setClues(suggestionState.suggestions.map(s => ({text: s.clue, emojis: s.emojis})));
     }
   }, [suggestionState]);
   
@@ -90,7 +90,7 @@ export default function ClueCardPage() {
     const result = await generateCluesFromChatAction(chatHistory);
     setChatGenerationResult(result);
     if (result.suggestions) {
-      setClues(result.suggestions);
+      setClues(result.suggestions.map(s => ({text: s.clue, emojis: s.emojis})));
     }
     setIsGeneratingFromChat(false);
   };
