@@ -1,8 +1,9 @@
 "use client";
 
+import { forwardRef } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Ghost, Loader2, Share2, Trash2 } from "lucide-react";
+import { Ghost, Share2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Clue {
@@ -15,10 +16,9 @@ interface ClueCardPreviewProps {
   colorPreference: string;
   onRemoveClue: (index: number) => void;
   onShare: () => void;
-  isGenerating: boolean;
 }
 
-export default function ClueCardPreview({ clues, colorPreference, onRemoveClue, onShare, isGenerating }: ClueCardPreviewProps) {
+const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clues, colorPreference, onRemoveClue, onShare }, ref) => {
   const colorSchemes: Record<string, string> = {
     Indigo: "bg-primary text-primary-foreground",
     Lavender: "bg-card-lavender text-card-lavender-foreground",
@@ -31,7 +31,7 @@ export default function ClueCardPreview({ clues, colorPreference, onRemoveClue, 
   const isDark = colorPreference !== 'Lavender';
 
   return (
-    <Card className={cn(
+    <Card ref={ref} className={cn(
       "relative h-full min-h-[500px] w-full flex flex-col overflow-hidden shadow-2xl transition-colors duration-300", 
       cardClass
     )}>
@@ -74,11 +74,14 @@ export default function ClueCardPreview({ clues, colorPreference, onRemoveClue, 
         </div>
       </CardContent>
       <CardFooter className="p-4 mt-auto">
-        <Button onClick={onShare} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold shadow-lg" disabled={isGenerating || clues.length === 0}>
-          {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Share2 className="mr-2 h-4 w-4" />}
-          {isGenerating ? "Generating Art..." : "Save & Share Card"}
+        <Button onClick={onShare} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold shadow-lg" disabled={clues.length === 0}>
+          <Share2 className="mr-2 h-4 w-4" />
+          Save & Share Card
         </Button>
       </CardFooter>
     </Card>
   );
-}
+});
+
+ClueCardPreview.displayName = "ClueCardPreview";
+export default ClueCardPreview;

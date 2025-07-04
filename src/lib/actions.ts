@@ -9,7 +9,6 @@ import {
   GenerateCluesFromChatOutput,
 } from "@/ai/flows/generate-clues-from-chat";
 import { moderateChatMessage, ModerateChatMessageOutput } from "@/ai/flows/moderate-chat-message";
-import { generateClueCardImage, GenerateClueCardImageOutput } from "@/ai/flows/generate-clue-card-image";
 import { z } from "zod";
 
 const topicSchema = z.object({
@@ -32,21 +31,6 @@ export async function moderateMessage(message: string): Promise<ModerateChatMess
     console.error("Moderation error:", error);
     return { isAppropriate: false, moderatedMessage: '🌟 This message was ghosted!' };
   }
-}
-
-// Clue Card Image Generation
-export async function generateCardImage(clues: string[], colorPreference: string): Promise<(GenerateClueCardImageOutput & { error?: string })> {
-    if (!clues || clues.length === 0) {
-        return { imageUrl: '', error: 'Please add at least one clue to generate an image.' };
-    }
-    try {
-        const result = await generateClueCardImage({ clues, colorPreference });
-        return result;
-    } catch (error) {
-        console.error("Card image generation error:", error);
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-        return { imageUrl: '', error: errorMessage };
-    }
 }
 
 export async function generateSuggestions(

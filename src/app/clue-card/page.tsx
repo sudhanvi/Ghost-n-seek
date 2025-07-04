@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useEffect, useActionState } from "react";
+import { useState, useEffect, useActionState, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import Image from "next/image";
 import { AlertCircle, Ghost, Loader2, Sparkles, Palette, MessageSquareQuote } from "lucide-react";
 import {
   generateSuggestions,
-  generateCardImage,
   generateCluesFromChatAction
 } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
@@ -15,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ClueCardPreview from "@/components/ClueCardPreview";
+import ShareDialog from "@/components/ShareDialog";
 import {
   Select,
   SelectContent,
@@ -22,13 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 
 function SubmitButton({ children, ...props }: { children: React.ReactNode; } & React.ComponentProps<typeof Button>) {
   const { pending } = useFormStatus();
@@ -55,14 +47,15 @@ export default function ClueCardPage() {
   const [clues, setClues] = useState<Clue[]>([]);
   const [colorPreference, setColorPreference] = useState("Indigo");
   
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const [generatedImage, setGeneratedImage] = useState<{url: string, error?: string} | null>(null);
-
   const [suggestionState, generateSuggestionsAction] = useActionState(generateSuggestions, null);
 
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [isGeneratingFromChat, setIsGeneratingFromChat] = useState(false);
   const [chatGenerationResult, setChatGenerationResult] = useState<{suggestions?: {clue: string, emojis: string}[], error?: string} | null>(null);
+
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const cardPreviewRef = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => {
     const savedChatHistory = sessionStorage.getItem('chatHistory');
@@ -95,23 +88,10 @@ export default function ClueCardPage() {
     setIsGeneratingFromChat(false);
   };
 
-  const handleGenerateImage = async () => {
+  const handleShare = () => {
     if (clues.length === 0) return;
-    setIsGeneratingImage(true);
-    setGeneratedImage(null);
-    const result = await generateCardImage(clues.map(c => c.text), colorPreference);
-    setGeneratedImage({ url: result.imageUrl, error: result.error });
-    if (!result.error) {
-        // Keep dialog open on success
-    } else {
-        setIsGeneratingImage(false);
-    }
+    setIsShareDialogOpen(true);
   };
-  
-  const closeImageDialog = () => {
-    setGeneratedImage(null);
-    setIsGeneratingImage(false);
-  }
 
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
@@ -231,48 +211,21 @@ export default function ClueCardPage() {
           
           <div className="lg:col-span-1">
             <ClueCardPreview 
+              ref={cardPreviewRef}
               clues={clues} 
               colorPreference={colorPreference}
               onRemoveClue={(index) => setClues(clues.filter((_, i) => i !== index))}
-              onShare={handleGenerateImage}
-              isGenerating={isGeneratingImage}
+              onShare={handleShare}
             />
           </div>
         </div>
       </div>
       
-      <Dialog open={!!generatedImage} onOpenChange={(open) => !open && closeImageDialog()}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Your Clue Card is Ready!</DialogTitle>
-            <DialogDescription>
-              {generatedImage?.error ? 'There was an error generating your card.' : 'Save this image and share it to see who can find you!'}
-            </DialogDescription>
-          </DialogHeader>
-          {generatedImage?.url && (
-            <div className="mt-4 rounded-lg overflow-hidden border">
-                <Image src={generatedImage.url} alt="Generated Clue Card" width={450} height={800} className="w-full h-auto" />
-            </div>
-          )}
-          {generatedImage?.error && (
-             <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Generation Failed</AlertTitle>
-                <AlertDescription>{generatedImage.error}</AlertDescription>
-              </Alert>
-          )}
-          <Button onClick={() => {
-              if (generatedImage?.url) {
-                  const link = document.createElement('a');
-                  link.href = generatedImage.url;
-                  link.download = 'clue-card.png';
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-              }
-          }} disabled={!generatedImage?.url}>Download Image</Button>
-        </DialogContent>
-      </Dialog>
+      <ShareDialog
+        open={isShareDialogOpen} 
+        onOpenChange={setIsShareDialogOpen}
+        cardRef={cardPreviewRef}
+      />
     </div>
   );
 }
