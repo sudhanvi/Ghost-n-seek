@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useState, useEffect, useActionState, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { AlertCircle, Ghost, Loader2, Sparkles, Palette, MessageSquareQuote, Gem, Coffee, Users } from "lucide-react";
+import { AlertCircle, Ghost, Loader2, Sparkles, Palette, MessageSquareQuote, Gem, Coffee, Users, Crown } from "lucide-react";
 import {
   generateSuggestions,
   generateCluesFromChatAction,
@@ -23,6 +24,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 
 function SubmitButton({ children, ...props }: { children: React.ReactNode; } & React.ComponentProps<typeof Button>) {
   const { pending } = useFormStatus();
@@ -66,6 +78,8 @@ export default function ClueCardPage() {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [imageGenerationError, setImageGenerationError] = useState<string | null>(null);
+
+  const [isPremiumDialogOpen, setIsPremiumDialogOpen] = useState(false);
 
 
   useEffect(() => {
@@ -114,11 +128,7 @@ export default function ClueCardPage() {
     setIsGeneratingFromChat(false);
   };
 
-  const handleGenerateImage = async () => {
-    if (userClues.length === 0) {
-        setImageGenerationError("Please generate some clues first.");
-        return;
-    }
+  const triggerImageGeneration = async () => {
     setIsGeneratingImage(true);
     setImageGenerationError(null);
     
@@ -134,6 +144,20 @@ export default function ClueCardPage() {
     }
     setIsGeneratingImage(false);
   };
+
+  const handleGenerateImage = () => {
+    if (userClues.length === 0) {
+        setImageGenerationError("Please generate some clues first.");
+        return;
+    }
+    setIsPremiumDialogOpen(true);
+  };
+  
+  const handleConfirmPremium = () => {
+    setIsPremiumDialogOpen(false);
+    triggerImageGeneration();
+  }
+
 
   const handleShare = () => {
     if (userClues.length === 0) return;
@@ -304,6 +328,32 @@ export default function ClueCardPage() {
         onOpenChange={setIsShareDialogOpen}
         cardRef={cardPreviewRef}
       />
+
+      <AlertDialog open={isPremiumDialogOpen} onOpenChange={setIsPremiumDialogOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>
+                <div className="flex items-center gap-2">
+                    <Crown className="w-6 h-6 text-amber-500"/>
+                     Unlock Premium Artwork?
+                </div>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+                This is a premium feature. For a one-time fee, our AI will generate a beautiful, unique artwork for your card based on your clues.
+                <br/><br/>
+                <span className="font-bold">This is a simulation. No real payment will be processed.</span>
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmPremium} className="bg-amber-500 hover:bg-amber-600">
+                Pay $1.99
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
+
+    
