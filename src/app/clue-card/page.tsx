@@ -220,6 +220,7 @@ export default function ClueCardPage() {
           <div className="lg:col-span-1">
             <ClueCardPreview 
               clues={clues} 
+              colorPreference={colorPreference}
               onRemoveClue={(index) => setClues(clues.filter((_, i) => i !== index))}
               onShare={handleGenerateImage}
               isGenerating={isGeneratingImage}

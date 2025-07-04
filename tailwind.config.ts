@@ -65,6 +65,18 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+        'card-lavender': {
+          DEFAULT: 'hsl(240, 67%, 94%)',
+          foreground: 'hsl(275, 100%, 25%)'
+        },
+        'card-crimson': {
+            DEFAULT: 'hsl(348, 83%, 47%)',
+            foreground: 'hsl(0, 0%, 100%)'
+        },
+        'card-teal': {
+            DEFAULT: 'hsl(180, 100%, 25%)',
+            foreground: 'hsl(0, 0%, 100%)'
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',

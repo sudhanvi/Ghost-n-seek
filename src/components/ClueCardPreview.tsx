@@ -3,6 +3,7 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Ghost, Loader2, Share2, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Clue {
   text: string;
@@ -11,27 +12,41 @@ interface Clue {
 
 interface ClueCardPreviewProps {
   clues: Clue[];
+  colorPreference: string;
   onRemoveClue: (index: number) => void;
   onShare: () => void;
   isGenerating: boolean;
 }
 
-export default function ClueCardPreview({ clues, onRemoveClue, onShare, isGenerating }: ClueCardPreviewProps) {
+export default function ClueCardPreview({ clues, colorPreference, onRemoveClue, onShare, isGenerating }: ClueCardPreviewProps) {
+  const colorSchemes: Record<string, string> = {
+    Indigo: "bg-primary text-primary-foreground",
+    Lavender: "bg-card-lavender text-card-lavender-foreground",
+    Purple: "bg-accent text-accent-foreground",
+    Crimson: "bg-card-crimson text-card-crimson-foreground",
+    Teal: "bg-card-teal text-card-teal-foreground",
+  };
+
+  const cardClass = colorSchemes[colorPreference] || colorSchemes.Indigo;
+  const isDark = colorPreference !== 'Lavender';
 
   return (
-    <Card className="relative h-full min-h-[500px] w-full flex flex-col overflow-hidden bg-primary text-primary-foreground shadow-2xl">
-      <Ghost className="absolute -right-12 -top-12 h-48 w-48 text-white/5 opacity-50" />
+    <Card className={cn(
+      "relative h-full min-h-[500px] w-full flex flex-col overflow-hidden shadow-2xl transition-colors duration-300", 
+      cardClass
+    )}>
+      <Ghost className={cn("absolute -right-12 -top-12 h-48 w-48 opacity-5", isDark ? 'text-white' : 'text-black')} />
       <CardHeader>
         <div className="flex items-center gap-2">
           <Ghost className="h-8 w-8 text-accent" />
           <h2 className="font-headline text-2xl font-bold">Ghost n seek</h2>
         </div>
-        <p className="text-primary-foreground/80">Can you find this person?</p>
+        <p className="opacity-80">Can you find this person?</p>
       </CardHeader>
       <CardContent className="flex-grow p-4">
         <div className="h-full">
           {clues.length > 0 ? (
-            <div className="bg-white/10 p-4 rounded-lg flex flex-col h-full text-base">
+            <div className={cn("p-4 rounded-lg flex flex-col h-full text-base", isDark ? 'bg-white/10' : 'bg-black/5')}>
               <p className="mb-3 font-semibold">We talked about:</p>
               <ol className="space-y-2 list-decimal list-inside pl-2 flex-grow">
                 {clues.map((clue, index) => (
@@ -40,7 +55,7 @@ export default function ClueCardPreview({ clues, onRemoveClue, onShare, isGenera
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity rounded-full hover:bg-white/20 flex-shrink-0"
+                      className={cn("h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex-shrink-0", isDark ? "hover:bg-white/20" : "hover:bg-black/10")}
                       onClick={() => onRemoveClue(index)}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -48,10 +63,10 @@ export default function ClueCardPreview({ clues, onRemoveClue, onShare, isGenera
                   </li>
                 ))}
               </ol>
-              <p className="mt-4 pt-4 border-t border-white/10 text-center italic text-sm">Now find me on social media ;)</p>
+              <p className={cn("mt-4 pt-4 border-t text-center italic text-sm", isDark ? 'border-white/10' : 'border-black/10')}>Now find me on social media ;)</p>
             </div>
           ) : (
-            <div className="flex h-full flex-col items-center justify-center text-center text-primary-foreground/60 p-8 border-2 border-dashed border-white/20 rounded-lg">
+            <div className={cn("flex h-full flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg opacity-60", isDark ? 'border-white/20' : 'border-black/20')}>
               <p>Your clues will appear here.</p>
               <p className="text-sm">Generate some from the left!</p>
             </div>
