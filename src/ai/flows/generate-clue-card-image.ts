@@ -31,11 +31,13 @@ const generateClueCardImageFlow = ai.defineFlow(
     outputSchema: GenerateClueCardImageOutputSchema,
   },
   async ({clues, colorPreference}) => {
-    const prompt = `Create a whimsical and cartoonish illustration for a social deduction game's clue card. The main character of the illustration is a simple, lovable, and gender-neutral mascot, similar to a "ZooZoo" or a stick figure. This mascot should be depicted in a single, cohesive scene that creatively combines all of the following concepts: ${clues.join(", ")}.
+    const prompt = `You are an AI artist creating a digital memento that represents a meaningful conversation. Your task is to generate a beautiful, abstract piece of art that symbolically combines all of the following concepts: ${clues.join(", ")}.
 
-The scene should be imaginative and visually tell a story based on the clues. For example, if the clues are "Joker," "white wine," and "Iceland," the mascot could be sipping wine with a Joker-like grin under the Northern Lights.
+Instead of a literal scene or characters, create a dreamlike and artistic composition. Think of it as a digital painting or a sophisticated collage. The elements should flow into each other seamlessly, creating a single, cohesive image that evokes a feeling or a memory of the conversation.
 
-Use a vibrant color palette influenced by the color theme: ${colorPreference}. The artwork should be fun, friendly, and have a 9:16 aspect ratio. Do not include any text in the image.`;
+For example, if the concepts are "Joker," "white wine," and "Iceland," you could create an image with swirling, abstract shapes in deep purples and blues reminiscent of the Northern Lights, with hints of a playing card's diamond pattern, and a splash of golden-white color flowing through the scene like wine.
+
+The final artwork should be aesthetically pleasing, with a 9:16 aspect ratio, and should not contain any text or recognizable human/mascot figures. The overall style should be influenced by the color theme of ${colorPreference}.`;
 
     const response = await ai.generate({
       model: 'googleai/gemini-2.0-flash-preview-image-generation',

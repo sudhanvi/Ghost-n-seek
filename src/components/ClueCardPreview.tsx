@@ -28,16 +28,7 @@ interface ClueCardPreviewProps {
 
 const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clues, colorPreference, onRemoveClue, onShare, imageUrl, isInteractive = true }, ref) => {
   const { toast } = useToast();
-  const colorSchemes: Record<string, { card: string, isDark: boolean }> = {
-    Indigo: { card: "bg-primary text-primary-foreground", isDark: true },
-    Lavender: { card: "bg-card-lavender text-card-lavender-foreground", isDark: false },
-    Purple: { card: "bg-accent text-accent-foreground", isDark: true },
-    Crimson: { card: "bg-card-crimson text-card-crimson-foreground", isDark: true },
-    Teal: { card: "bg-card-teal text-card-teal-foreground", isDark: true },
-  };
-
-  const { card: cardClass, isDark } = colorSchemes[colorPreference] || colorSchemes.Indigo;
-
+  
   const handleShareClick = () => {
     if (!isInteractive) {
         toast({
@@ -50,19 +41,19 @@ const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clue
 
   return (
     <Card ref={ref} className="w-full max-w-sm mx-auto flex flex-col overflow-hidden shadow-2xl p-0">
-        <div className={cn("aspect-[9/16] w-full relative bg-muted flex items-center justify-center", !imageUrl && cardClass)}>
+        <div className={cn("aspect-[9/16] w-full relative bg-muted flex items-center justify-center")}>
             {imageUrl ? (
                 <img
                     src={imageUrl}
-                    alt="A cartoonish mascot in a scene representing the clues."
-                    data-ai-hint="mascot illustration"
+                    alt="An abstract artwork representing the clues from the chat."
+                    data-ai-hint="abstract art"
                     className="absolute inset-0 w-full h-full object-cover"
                 />
             ) : (
                 <div className="flex flex-col items-center justify-center text-center p-8">
-                    <ImageIcon className={cn("h-16 w-16 opacity-50", isDark ? "text-white" : "text-black")} />
-                    <p className="mt-4 font-semibold text-lg">Your Artwork Here</p>
-                    <p className="text-sm opacity-80">Generate a premium card to see a unique image based on these clues!</p>
+                    <ImageIcon className="h-16 w-16 opacity-50 text-muted-foreground" />
+                    <p className="mt-4 font-semibold text-lg">Your Memento Artwork</p>
+                    <p className="text-sm opacity-80">Generate a premium card to create a unique piece of art from your conversation.</p>
                 </div>
             )}
         </div>
