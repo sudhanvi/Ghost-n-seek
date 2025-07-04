@@ -31,13 +31,13 @@ const generateClueCardImageFlow = ai.defineFlow(
     outputSchema: GenerateClueCardImageOutputSchema,
   },
   async ({clues, colorPreference}) => {
-    const prompt = `You are an AI artist creating a digital memento that represents a meaningful conversation. Your task is to generate a beautiful, abstract piece of art that symbolically combines all of the following concepts: ${clues.join(", ")}.
+    const prompt = `You are an AI artist creating a digital memento that represents a meaningful conversation. Your task is to generate a beautiful, whimsical, Ghibli-inspired digital illustration that symbolically combines all of the following concepts: ${clues.join(", ")}.
 
-Instead of a literal scene or characters, create a dreamlike and artistic composition. Think of it as a digital painting or a sophisticated collage. The elements should flow into each other seamlessly, creating a single, cohesive image that evokes a feeling or a memory of the conversation.
+Create a single, cohesive, and memorable scene. Think of it as a still from an animated film. The elements should be integrated naturally into the environment, creating a piece of art that evokes a feeling of wonder and nostalgia.
 
-For example, if the concepts are "Joker," "white wine," and "Iceland," you could create an image with swirling, abstract shapes in deep purples and blues reminiscent of the Northern Lights, with hints of a playing card's diamond pattern, and a splash of golden-white color flowing through the scene like wine.
+For example, if the concepts are "Joker," "white wine," and "Iceland," you could create an image of a character with a subtle, mischievous smile (reminiscent of the Joker, but not a direct copy) enjoying a glass of white wine while overlooking a fantastical, Ghibli-esque Icelandic landscape with glowing moss and gentle spirits.
 
-The final artwork should be aesthetically pleasing, with a 9:16 aspect ratio, and should not contain any text or recognizable human/mascot figures. The overall style should be influenced by the color theme of ${colorPreference}.`;
+The final artwork should be aesthetically pleasing, with a 9:16 aspect ratio, and should not contain any text. The overall color palette and mood should be influenced by the color theme of ${colorPreference}.`;
 
     const response = await ai.generate({
       model: 'googleai/gemini-2.0-flash-preview-image-generation',

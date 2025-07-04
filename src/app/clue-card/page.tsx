@@ -72,7 +72,8 @@ export default function ClueCardPage() {
   const [chatGenerationResult, setChatGenerationResult] = useState<{userSuggestions?: Clue[], partnerSuggestions?: Clue[], error?: string} | null>(null);
 
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const cardPreviewRef = useRef<HTMLDivElement>(null);
+  const [imageToShare, setImageToShare] = useState<string | null>(null);
+  const cardTextRef = useRef<HTMLDivElement>(null);
   const cardsPreviewRef = useRef<HTMLDivElement>(null);
 
 
@@ -173,8 +174,9 @@ export default function ClueCardPage() {
   }
 
 
-  const handleShare = () => {
+  const handleShare = (imageUrl: string | null) => {
     if (partnerClues.length === 0) return;
+    setImageToShare(imageUrl);
     setIsShareDialogOpen(true);
   };
 
@@ -314,7 +316,7 @@ export default function ClueCardPage() {
                 <div>
                     <h2 className="text-2xl font-headline font-bold text-center mb-4 text-primary">Their Card (Share this to find them!)</h2>
                     <ClueCardPreview 
-                        ref={cardPreviewRef}
+                        ref={cardTextRef}
                         clues={partnerClues} 
                         colorPreference={colorPreference}
                         onRemoveClue={(index) => handlePartnerCluesChange(partnerClues.filter((_, i) => i !== index))}
@@ -340,7 +342,8 @@ export default function ClueCardPage() {
       <ShareDialog
         open={isShareDialogOpen} 
         onOpenChange={setIsShareDialogOpen}
-        cardRef={cardPreviewRef}
+        cardRef={cardTextRef}
+        imageUrl={imageToShare}
       />
 
       <AlertDialog open={isPremiumDialogOpen} onOpenChange={setIsPremiumDialogOpen}>

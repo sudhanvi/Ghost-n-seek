@@ -21,7 +21,7 @@ interface ClueCardPreviewProps {
   clues: Clue[];
   colorPreference: string;
   onRemoveClue: (index: number) => void;
-  onShare: () => void;
+  onShare: (imageUrl: string | null) => void;
   imageUrl?: string | null;
   isInteractive?: boolean;
 }
@@ -36,11 +36,12 @@ const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clue
         });
         return;
     }
-    onShare();
+    // If we have an image, we share the image. Otherwise, we share the text card.
+    onShare(imageUrl ?? null);
   };
 
   return (
-    <Card ref={ref} className="w-full max-w-sm mx-auto flex flex-col overflow-hidden shadow-2xl p-0">
+    <Card className="w-full max-w-sm mx-auto flex flex-col overflow-hidden shadow-2xl p-0">
         <div className={cn("aspect-[9/16] w-full relative bg-muted flex items-center justify-center")}>
             {imageUrl ? (
                 <img
@@ -57,7 +58,7 @@ const ClueCardPreview = forwardRef<HTMLDivElement, ClueCardPreviewProps>(({ clue
                 </div>
             )}
         </div>
-        <div className="p-4 sm:p-6 flex flex-col flex-grow bg-card text-card-foreground">
+        <div ref={ref} className="p-4 sm:p-6 flex flex-col flex-grow bg-card text-card-foreground">
             <CardHeader className="p-0 mb-4">
                 <div className="flex items-center gap-2">
                     <GhostIcon className="h-8 w-8 text-accent" />

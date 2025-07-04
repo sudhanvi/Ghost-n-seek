@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, RefObject, useEffect } from "react";
-import { toPng, toBlob } from "html-to-image";
+import { toBlob } from "html-to-image";
 import { Download, Loader2, Share } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,9 +18,10 @@ interface ShareDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   cardRef: RefObject<HTMLDivElement>;
+  imageUrl: string | null;
 }
 
-export default function ShareDialog({ open, onOpenChange, cardRef }: ShareDialogProps) {
+export default function ShareDialog({ open, onOpenChange, cardRef, imageUrl }: ShareDialogProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [canShare, setCanShare] = useState(false);
   const { toast } = useToast();
@@ -31,7 +32,25 @@ export default function ShareDialog({ open, onOpenChange, cardRef }: ShareDialog
     }
   }, []);
 
-  const generateImageAsBlob = async (): Promise<Blob | null> => {
+  const getFinalImageBlob = async (): Promise<Blob | null> => {
+    // If a premium image URL is provided, fetch it and return as a blob.
+    if (imageUrl) {
+        try {
+            const response = await fetch(imageUrl);
+            if (!response.ok) throw new Error("Failed to fetch image data.");
+            return await response.blob();
+        } catch (err) {
+            console.error("Oops, something went wrong fetching the image!", err);
+            toast({
+                variant: "destructive",
+                title: "Image Download Failed",
+                description: "Could not retrieve the generated artwork. Please try again.",
+            });
+            return null;
+        }
+    }
+
+    // Otherwise, generate an image of the text-based card.
     if (!cardRef.current) {
       toast({
         variant: "destructive",
@@ -40,9 +59,6 @@ export default function ShareDialog({ open, onOpenChange, cardRef }: ShareDialog
       });
       return null;
     }
-
-    const originalShadow = cardRef.current.style.boxShadow;
-    cardRef.current.style.boxShadow = 'none';
 
     try {
       const blob = await toBlob(cardRef.current, { cacheBust: true, pixelRatio: 2 });
@@ -56,15 +72,13 @@ export default function ShareDialog({ open, onOpenChange, cardRef }: ShareDialog
         description: "Could not create an image of the card. Please try again.",
       });
       return null;
-    } finally {
-      cardRef.current.style.boxShadow = originalShadow;
     }
   };
 
 
   const handleDownload = async () => {
     setIsProcessing(true);
-    const blob = await generateImageAsBlob();
+    const blob = await getFinalImageBlob();
     if (blob) {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -80,7 +94,7 @@ export default function ShareDialog({ open, onOpenChange, cardRef }: ShareDialog
 
   const handleShare = async () => {
     setIsProcessing(true);
-    const blob = await generateImageAsBlob();
+    const blob = await getFinalImageBlob();
     
     if (blob) {
       const file = new File([blob], "clue-card.png", { type: blob.type });
