@@ -38,19 +38,23 @@ const prompt = ai.definePrompt({
   name: 'generateCluesFromChatPrompt',
   input: {schema: GenerateCluesFromChatInputSchema},
   output: {schema: GenerateCluesFromChatOutputSchema},
-  prompt: `You are a creative assistant for a social game called Ghost n seek. Your task is to analyze a chat conversation and extract interesting, unique, and non-identifying clues about the user (sender: "me").
+  prompt: `You are a master clue-smith for a social deduction game called Ghost n seek. Your primary goal is to analyze a chat transcript and identify **crucial phrases** and statements made by the user (sender: "me") that can be turned into compelling, non-identifying clues.
 
-  The clues should have a high "rarity score" - meaning they are specific and not generic. They should be phrased from the user's perspective (e.g., "I enjoy...").
-  Focus on hobbies, opinions, unique experiences, and tastes mentioned by the user. Ignore generic conversational filler. Do not extract any potentially identifying information.
+A "crucial phrase" is a statement that reveals personality, a unique opinion, a specific interest, a memorable experience, or a niche piece of knowledge. Your generated clues should be based *directly* on these phrases.
 
-  For each clue you generate, also create a creative and abstract "Emoji DNA" string (3-5 emojis) that symbolically represents it.
+**Your Task:**
+1.  Read the entire chat history provided below.
+2.  Identify 3 to 5 **crucial phrases** or statements from the user ("me").
+3.  For each crucial phrase, transform it into a first-person clue (e.g., "I believe that..."). The clue must be interesting and have a high "rarity score" – it should be specific, not generic.
+4.  For each clue, generate a creative and abstract "Emoji DNA" string (3-5 emojis) that symbolically represents it.
+5.  **Crucially, do not extract any potentially identifying information** (names, locations, contact info, etc.).
 
-  Here is the chat history:
-  {{#each chatHistory}}
-  {{sender}}: {{text}}
-  {{/each}}
+**Chat History:**
+{{#each chatHistory}}
+{{sender}}: {{text}}
+{{/each}}
 
-  Generate 3 to 5 clue suggestions based on the user's (me) messages.
+Based on your analysis, generate the clue suggestions.
   `,
 });
 
