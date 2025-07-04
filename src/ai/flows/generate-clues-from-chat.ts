@@ -21,12 +21,13 @@ const GenerateCluesFromChatInputSchema = z.object({
 });
 export type GenerateCluesFromChatInput = z.infer<typeof GenerateCluesFromChatInputSchema>;
 
-export const SuggestionSchema = z.object({
+const SuggestionSchema = z.object({
     clue: z.string().describe('The suggested clue text.'),
     emojis: z.string().describe('A unique string of 3-5 emojis that represents the clue.')
 });
+export type Suggestion = z.infer<typeof SuggestionSchema>;
 
-export const GenerateCluesFromChatOutputSchema = z.object({
+const GenerateCluesFromChatOutputSchema = z.object({
   suggestions: z.array(SuggestionSchema).describe('An array of clue suggestions derived from the chat, each with text and an emoji DNA string.'),
 });
 export type GenerateCluesFromChatOutput = z.infer<typeof GenerateCluesFromChatOutputSchema>;

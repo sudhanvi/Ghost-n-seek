@@ -6,7 +6,7 @@ import {
 } from '@/ai/flows/generate-clue-card-suggestions';
 import {
   generateCluesFromChat,
-  SuggestionSchema,
+  type Suggestion,
 } from '@/ai/flows/generate-clues-from-chat';
 import {
   moderateChatMessage,
@@ -84,10 +84,9 @@ export async function generateSuggestions(
   }
 }
 
-const Suggestion = z.infer<typeof SuggestionSchema>;
 export async function generateCluesFromChatAction(chatHistory: Message[]): Promise<{
-  userSuggestions: typeof Suggestion[];
-  partnerSuggestions: typeof Suggestion[];
+  userSuggestions: Suggestion[];
+  partnerSuggestions: Suggestion[];
   error?: string;
 }> {
   if (!chatHistory || chatHistory.length === 0) {
