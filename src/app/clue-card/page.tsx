@@ -30,11 +30,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
-function SubmitButton({ children, ...props }: { children: React.ReactNode; startIcon?: React.ReactNode } & React.ComponentProps<typeof Button>) {
+function SubmitButton({ children, startIcon, ...props }: { children: React.ReactNode; startIcon?: React.ReactNode } & React.ComponentProps<typeof Button>) {
   const { pending } = useFormStatus();
   return (
     <Button {...props} disabled={pending || props.disabled}>
-      {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : props.startIcon}
+      {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : startIcon}
       {children}
     </Button>
   );
