@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useState, useEffect, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import Image from "next/image";
 import { AlertCircle, CheckCircle, Ghost, Loader2, Sparkles, Wand2, Palette, MessageSquareQuote } from "lucide-react";
 import {
@@ -62,8 +62,8 @@ export default function ClueCardPage() {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<{url: string, error?: string} | null>(null);
 
-  const [analysisState, analyzeClueAction] = useFormState(analyzeClue, null);
-  const [suggestionState, generateSuggestionsAction] = useFormState(generateSuggestions, null);
+  const [analysisState, analyzeClueAction] = useActionState(analyzeClue, null);
+  const [suggestionState, generateSuggestionsAction] = useActionState(generateSuggestions, null);
 
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [isGeneratingFromChat, setIsGeneratingFromChat] = useState(false);
