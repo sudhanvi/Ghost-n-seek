@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useActionState, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { AlertCircle, Ghost, Loader2, Sparkles, Palette, MessageSquareQuote, Gem } from "lucide-react";
+import { AlertCircle, Ghost, Loader2, Sparkles, Palette, MessageSquareQuote, Gem, Coffee } from "lucide-react";
 import {
   generateSuggestions,
   generateCluesFromChatAction,
@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ClueCardPreview from "@/components/ClueCardPreview";
 import ShareDialog from "@/components/ShareDialog";
+import AdPlacement from "@/components/AdPlacement";
 import {
   Select,
   SelectContent,
@@ -267,6 +268,23 @@ export default function ClueCardPage() {
                     )}
                 </CardContent>
               </Card>
+              
+              <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 font-headline">
+                        <Coffee className="text-accent" />
+                        Support the Creator
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">If you enjoy this app, consider buying me a coffee! It helps keep the servers running.</p>
+                    <Button asChild className="w-full bg-[#FFDC00] text-black hover:bg-[#FFDC00]/90">
+                        <a href="https://paypal.me/sidphotos" target="_blank" rel="noopener noreferrer">
+                            Buy me a coffee
+                        </a>
+                    </Button>
+                </CardContent>
+            </Card>
 
             </div>
           </div>
@@ -282,6 +300,9 @@ export default function ClueCardPage() {
             />
           </div>
         </div>
+        
+        <AdPlacement />
+
       </div>
       
       <ShareDialog
