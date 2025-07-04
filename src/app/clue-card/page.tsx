@@ -30,11 +30,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
-function SubmitButton({ children, startIcon, ...props }: { children: React.ReactNode; startIcon?: React.ReactNode } & React.ComponentProps<typeof Button>) {
+function SubmitButton({ children, ...props }: { children: React.ReactNode; } & React.ComponentProps<typeof Button>) {
   const { pending } = useFormStatus();
   return (
     <Button {...props} disabled={pending || props.disabled}>
-      {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : startIcon}
+      {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
       {children}
     </Button>
   );
@@ -148,11 +148,17 @@ export default function ClueCardPage() {
                                     <AlertTitle>Error</AlertTitle>
                                     <AlertDescription>{chatGenerationResult.error}</AlertDescription>
                                 </Alert>
-                            ) : (
+                            ) : chatGenerationResult.suggestions && chatGenerationResult.suggestions.length > 0 ? (
                                 <Alert>
                                     <Sparkles className="h-4 w-4" />
                                     <AlertTitle>Success!</AlertTitle>
                                     <AlertDescription>Your clues are ready. Check out the preview!</AlertDescription>
+                                </Alert>
+                            ) : (
+                                <Alert variant="destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertTitle>No Clues Found</AlertTitle>
+                                    <AlertDescription>We couldn't find any unique topics in the chat. Try generating clues from a topic instead.</AlertDescription>
                                 </Alert>
                             )}
                         </div>
@@ -165,7 +171,7 @@ export default function ClueCardPage() {
                           <Label htmlFor="topic">Or, get suggestions for a topic</Label>
                           <Input id="topic" name="topic" placeholder="e.g., Hobbies, Music, Dreams" required/>
                         </div>
-                        <SubmitButton startIcon={<Sparkles className="mr-2 h-4 w-4" />}>Get Suggestions</SubmitButton>
+                        <SubmitButton>Get Suggestions</SubmitButton>
                       </form>
                       {suggestionState && (
                         <div className="mt-4">
@@ -175,11 +181,17 @@ export default function ClueCardPage() {
                                     <AlertTitle>Error</AlertTitle>
                                     <AlertDescription>{suggestionState.error}</AlertDescription>
                                 </Alert>
-                            ) : (
+                            ) : suggestionState.suggestions && suggestionState.suggestions.length > 0 ? (
                                <Alert>
                                     <Sparkles className="h-4 w-4" />
                                     <AlertTitle>Success!</AlertTitle>
                                     <AlertDescription>Your clues are ready. Check out the preview!</AlertDescription>
+                                </Alert>
+                            ) : (
+                                <Alert variant="destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertTitle>No Suggestions Found</AlertTitle>
+                                    <AlertDescription>We couldn't find any suggestions for that topic. Please try a different one.</AlertDescription>
                                 </Alert>
                             )}
                         </div>
