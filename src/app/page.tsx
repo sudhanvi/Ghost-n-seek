@@ -12,7 +12,7 @@ export default function Home() {
           </div>
         </div>
         <h1 className="font-headline text-5xl font-bold tracking-tighter text-primary md:text-7xl">
-          ClueConnect
+          Ghost n seek
         </h1>
         <p className="max-w-md text-lg text-foreground/80 md:text-xl">
           Three minutes of anonymous chat. A lifetime of connection. Can you find your match from just a few clues?

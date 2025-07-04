@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'ClueConnect',
-  description: 'Find your connection, one clue at a time.',
+  title: 'Ghost n seek',
+  description: 'A game of anonymous chat and discovery.',
 };
 
 export default function RootLayout({

@@ -26,7 +26,7 @@ export default function ClueCardPreview({ clues, onRemoveClue }: ClueCardPreview
       <CardHeader>
         <div className="flex items-center gap-2">
           <Ghost className="h-8 w-8 text-accent" />
-          <h2 className="font-headline text-2xl font-bold">ClueConnect</h2>
+          <h2 className="font-headline text-2xl font-bold">Ghost n seek</h2>
         </div>
         <p className="text-primary-foreground/80">Can you find this person?</p>
       </CardHeader>
