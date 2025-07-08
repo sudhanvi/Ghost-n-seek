@@ -1,3 +1,5 @@
+// src/ai/flows/generate-clue-card-image.ts
+
 'use server';
 /**
  * @fileOverview Generates a custom image for a clue card.
@@ -50,17 +52,9 @@ The final artwork should be aesthetically pleasing, with a 9:16 aspect ratio, an
     const media = response.media;
 
     if (!media || !media.url) {
-      const finishReason = response.candidates[0]?.finishReason;
-      console.error("Image generation failed.", { finishReason, safetyRatings: response.candidates[0]?.safetyRatings });
-
-      let errorMessage = 'Image generation failed.';
-      if (finishReason === 'SAFETY') {
-        errorMessage = 'Image could not be generated due to safety policies. Please try different clues.';
-      } else if (finishReason) {
-        errorMessage = `Image generation failed. Reason: ${finishReason}`;
-      } else {
-        errorMessage = 'The model did not return an image. Please try again.';
-      }
+      console.error("Image generation failed.");
+      
+      const errorMessage = 'Image generation failed. The model did not return an image. Please try again.';
 
       throw new Error(errorMessage);
     }

@@ -1,34 +1,27 @@
-import type {Metadata} from 'next';
+// src/app/layout.tsx
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster"
-import Script from 'next/script';
+import type { ReactNode } from 'react';
+import GhostBackground from '@/components/ui/ghost-background';
+import PayPalProvider from '@/components/PaypalProvider'; // your existing provider
 
-export const metadata: Metadata = {
-  title: 'Ghost n seek',
-  description: 'A game of anonymous chat and discovery.',
+export const metadata = {
+  title: 'Ghost-n-Seek',
+  description: 'Anonymous 3-minute spooky chats & clue cards',
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" crossOrigin="anonymous" />
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
-          crossOrigin="anonymous"
-          strategy="lazyOnload"
-        />
-      </head>
-      <body className="font-body antialiased">
-        {children}
-        <Toaster />
+    <html lang="en" className="bg-gradient-to-b from-purple-900 via-purple-800 to-black">
+      <body className="overflow-hidden relative">
+        {/* 1) The “spooky-bg” div lives here behind everything */}
+        <GhostBackground />
+
+        {/* 2) Your app content goes on top (give it a higher stacking context) */}
+        <div className="relative z-10">
+          <PayPalProvider>
+            {children}
+          </PayPalProvider>
+        </div>
       </body>
     </html>
   );

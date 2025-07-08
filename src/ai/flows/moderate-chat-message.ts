@@ -1,3 +1,5 @@
+// src/ai/flows/moderate-chat-message.ts
+
 'use server';
 /**
  * @fileOverview A chat moderation AI agent.
@@ -29,18 +31,19 @@ const prompt = ai.definePrompt({
   name: 'moderateChatMessagePrompt',
   input: {schema: ModerateChatMessageInputSchema},
   output: {schema: ModerateChatMessageOutputSchema},
-  prompt: `You are a chat moderator for an anonymous chat app called Ghost n seek. Your job is to protect users.
+  prompt: `You are a chat moderator for an anonymous chat app called Ghost n seek. Your job is to protect users by filtering out harmful or identifying content.
 
-  Analyze the following message for any of the following violations:
-  - Profanity (use a standard English blacklist)
-  - Personally Identifiable Information (PII) like phone numbers, real names, or email addresses (use regex-style pattern matching).
-  - Predatory, hateful, or explicit language.
-  - URLs or attempts to direct users off-platform.
+Analyze the following message for any of the following violations:
+- Profanity (use a standard English blacklist).
+- Personally Identifiable Information (PII) like phone numbers, real names, or email addresses (use regex-style pattern matching).
+- Social media handles (e.g., "@username", "snap:", "insta:").
+- Predatory, hateful, or explicit language.
+- URLs or attempts to direct users off-platform.
 
-  Message: {{{message}}}
+Message: {{{message}}}
 
-  If the message contains any violations, set 'isAppropriate' to false and set 'moderatedMessage' to '🌟 This message was ghosted!'.
-  If the message is clean, set 'isAppropriate' to true and return the original message in 'moderatedMessage'.
+If the message contains any violations, set 'isAppropriate' to false and set 'moderatedMessage' to '🌟 This message was ghosted!'.
+If the message is clean, set 'isAppropriate' to true and return the original message in 'moderatedMessage'.
   `,
 });
 

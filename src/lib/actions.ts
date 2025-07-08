@@ -1,9 +1,6 @@
+// src/lib/actions.ts
 'use server';
 
-import {
-  generateClueCardSuggestions,
-  GenerateClueCardSuggestionsOutput,
-} from '@/ai/flows/generate-clue-card-suggestions';
 import {
   generateCluesFromChat,
   type Suggestion,
@@ -18,14 +15,6 @@ import {
   GenerateClueCardImageOutput,
 } from '@/ai/flows/generate-clue-card-image';
 import {z} from 'zod';
-
-const topicSchema = z
-  .object({
-    topic: z
-      .string()
-      .min(3, 'Topic must be at least 3 characters long.')
-      .max(50, "Topic can't be more than 50 characters."),
-  });
 
 type Message = {
   id: number;
@@ -46,40 +35,6 @@ export async function moderateMessage(
     return {
       isAppropriate: false,
       moderatedMessage: '🌟 This message was ghosted!',
-    };
-  }
-}
-
-export async function generateSuggestions(
-  prevState: (GenerateClueCardSuggestionsOutput & {error?: string}) | null,
-  formData: FormData
-): Promise<(GenerateClueCardSuggestionsOutput & {error?: string}) | null> {
-  const validatedFields = topicSchema.safeParse({
-    topic: formData.get('topic'),
-  });
-
-  if (!validatedFields.success) {
-    return {
-      suggestions: [],
-      error: validatedFields.error.errors.map(e => e.message).join(', '),
-    };
-  }
-
-  try {
-    const currentDate = new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-    const result = await generateClueCardSuggestions({
-      topic: validatedFields.data.topic,
-      currentDate,
-    });
-    return result;
-  } catch (error) {
-    return {
-      suggestions: [],
-      error: 'Could not generate suggestions. Please try again.',
     };
   }
 }
